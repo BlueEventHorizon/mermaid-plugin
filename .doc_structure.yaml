@@ -19,7 +19,6 @@ specs:
   doc_types_map:
     "docs/specs/**/requirements/": requirement
     "docs/specs/**/design/": design
-    "docs/specs/**/plan/": plan
   patterns:
     target_glob: "**/*.md"
-    exclude: []
+    exclude: [plan]

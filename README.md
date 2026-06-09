@@ -23,7 +23,7 @@ Mermaid 図を書くときに AI が見落としがちな**暗黙ルール**と*
 
 ```bash
 # 1. marketplace としてリポジトリを登録
-/plugin marketplace add k2moons/mermaid-plugin
+/plugin marketplace add BlueEventHorizon/mermaid-plugin
 
 # 2. mermaid plugin を install
 /plugin install mermaid@mermaid-plugin
@@ -45,7 +45,7 @@ Mermaid 図を書くときに AI が見落としがちな**暗黙ルール**と*
 このリポジトリを直接 clone してロードする場合:
 
 ```bash
-git clone https://github.com/k2moons/mermaid-plugin ~/tools/mermaid-plugin
+git clone https://github.com/BlueEventHorizon/mermaid-plugin ~/tools/mermaid-plugin
 claude --plugin-dir ~/tools/mermaid-plugin/plugins/mermaid
 ```
 
@@ -55,7 +55,7 @@ Codex CLI には marketplace 機構がない。`.agents/skills/` を proximity s
 
 ```bash
 # 1. リポジトリを任意の場所にクローン
-git clone https://github.com/k2moons/mermaid-plugin ~/tools/mermaid-plugin
+git clone https://github.com/BlueEventHorizon/mermaid-plugin ~/tools/mermaid-plugin
 
 # 2. プロジェクトの .agents/skills/ から symlink
 mkdir -p .agents/skills

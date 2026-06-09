@@ -2,7 +2,7 @@
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "mermaid-plugin",
   "owner": {
-    "name": "k2moons"
+    "name": "BlueEventHorizon"
   },
   "metadata": {
     "description": "Mermaid 図作成のチェックリスト Skill を配布する単独 plugin marketplace。",
@@ -15,9 +15,9 @@
       "description": "Mermaid 図作成のチェックリスト Skill。v10+ 構文・GitHub btoa Latin-1 エラー・renderer 固有の落とし穴をまとめる。",
       "version": "0.1.0",
       "author": {
-        "name": "k2moons"
+        "name": "BlueEventHorizon"
       },
-      "homepage": "https://github.com/k2moons/mermaid-plugin"
+      "homepage": "https://github.com/BlueEventHorizon/mermaid-plugin"
     }
   ]
 }

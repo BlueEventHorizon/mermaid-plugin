@@ -4,11 +4,11 @@
   "description": "Mermaid 図作成のチェックリスト Skill。v10+ 構文・GitHub btoa Latin-1 エラー・renderer 固有の落とし穴をまとめる。",
   "version": "0.1.0",
   "author": {
-    "name": "k2moons"
+    "name": "BlueEventHorizon"
   },
   "license": "MIT",
-  "homepage": "https://github.com/k2moons/mermaid-plugin",
-  "repository": "https://github.com/k2moons/mermaid-plugin",
+  "homepage": "https://github.com/BlueEventHorizon/mermaid-plugin",
+  "repository": "https://github.com/BlueEventHorizon/mermaid-plugin",
   "keywords": [
     "mermaid",
     "diagram",
