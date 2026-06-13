@@ -1,7 +1,31 @@
+# ===========================
+
+# Claude Code
+.claude/settings.local.json
+.claude/.temp/
+
+.claude/scheduled_tasks.lock
+
+# テスト用一時ディレクトリ（tempfile.mkdtemp の出力先・/tmp 不可環境のフォールバック）
+tests/**/.temp/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+*.bak
 .DS_Store
-.claude/
-.claude-local/
-node_modules/
-*.log
-.env
-.env.*
+
+# UXUI 参照画像（著作権配慮のためデフォルト除外。README/notes は git 管理下に残す）
+**/uxui_references/competitors/
+**/uxui_references/inspirations/
+
+# プロジェクト外参照
+
+**/meta/
+**/meta
+
+**/reference_projects/
+**/reference_projects
+docs/references
