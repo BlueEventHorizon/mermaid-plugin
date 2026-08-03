@@ -62,7 +62,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `plugin.json` の `version` を上げると Claude Code 側で更新通知される
 - `marketplace.json` の `plugins[].version` は plugin.json の値が優先される ("plugin.json wins silently")
 - `version` を省略すると git commit SHA が版番として使われる
-- 現状 `0.2.2`。SKILL.md の実質改訂時にバンプする運用
+- 現状 `0.2.3`。SKILL.md の実質改訂時にバンプする運用
 
 ## 仕様変更前の再確認
 
