@@ -62,7 +62,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `plugin.json` の `version` を上げると Claude Code 側で更新通知される
 - `marketplace.json` の `plugins[].version` は plugin.json の値が優先される ("plugin.json wins silently")
 - `version` を省略すると git commit SHA が版番として使われる
-- 現状 `0.2.3`。SKILL.md の実質改訂時にバンプする運用
+- バージョンアップはユーザーが明示的に指示した場合のみ行う。SKILL.md の改訂、Issue 対応、
+  PR 作成を理由に Agent の判断でバージョンを上げない
+- 現在のバージョンは `plugins/mermaid/.claude-plugin/plugin.json` を正本とし、本ファイルに重複記載しない
 
 ## 仕様変更前の再確認
 

@@ -1,0 +1,19 @@
+# version_config_version: 1.0
+
+targets:
+  - name: mermaid
+    version_file: plugins/mermaid/.claude-plugin/plugin.json
+    version_path: version
+    sync_files:
+      - path: .claude-plugin/marketplace.json
+        pattern: '"version": "{version}"'
+        filter: '"metadata"'
+      - path: .claude-plugin/marketplace.json
+        pattern: '"version": "{version}"'
+        filter: '"name": "mermaid"'
+
+git:
+  tag_format: "v{version}"
+  commit_message: "chore: bump {target} to {version}"
+  auto_tag: false
+  auto_commit: false
