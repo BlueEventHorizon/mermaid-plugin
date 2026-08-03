@@ -1,7 +1,7 @@
 ---
 name: mermaid-lint
 description: |
-  Mermaid 図を静的検査する。lowercase `end`、flowchart の行末 `%%` コメント、circle/cross edge の誤解釈、flowchart / classDiagram での Note 使用、flowchart の素の識別子に絵文字・矢印・数学記号等の Unicode 記号を使うことによる lexical error を機械判定する。Markdown 内の ```mermaid ブロックを抽出して検査でき、標準入力にも対応する。Use when mermaid 図を書き終えて検証したいとき、CI やスクリプトから mermaid をチェックしたいとき。
+  Mermaid 図を静的検査する。lowercase `end`、flowchart の行末 `%%` コメント、circle/cross edge の誤解釈、flowchart / classDiagram での Note 使用、flowchart の素の識別子に Unicode Letter 以外の非 ASCII 文字を使うことによるエラーを機械判定する。Markdown 内の ```mermaid ブロックを抽出して検査でき、標準入力にも対応する。Use when mermaid 図を書き終えて検証したいとき、CI やスクリプトから mermaid をチェックしたいとき。
 allowed-tools: Bash(${CLAUDE_SKILL_DIR}/scripts/lint_mermaid.py *)
 ---
 
@@ -43,7 +43,7 @@ NG が 1 件でもあれば終了コード 1。WARN だけなら 0。
 
 | check | 判定 | 内容 |
 | ---- | ---- | ---- |
-| `lexical` | NG | flowchart の素のノード ID に絵文字・矢印・数学記号等 (Unicode Symbol カテゴリ) の文字。ID ではなくラベルにする |
+| `lexical` | NG | flowchart の素のノード ID に Letter 以外の非 ASCII 文字（記号・句読点・全角数字・全角括弧等を含む）。ID ではなくラベルにする |
 | `end` | NG | ノード ID に lowercase `end`。`subgraph` 終端と衝突する |
 | `comment` | NG | flowchart の行末 `%%` コメント |
 | `note` | NG | flowchart / classDiagram での `Note` キーワード |
@@ -56,10 +56,10 @@ NG が 1 件でもあれば終了コード 1。WARN だけなら 0。
 パイプラベル・素のノード ID・stateDiagram の状態 ID/遷移ラベル）でも再現しなかった。
 
 flowchart の `lexical` チェックは Unicode の一般カテゴリで判定する。**Letter カテゴリ
-(Lo/Lm/Lu/Ll/Lt。CJK 統合漢字・ひらがな・カタカナ等) は素の識別子でも安全**、
-**Symbol カテゴリ (Sm/So/Sc/Sk。絵文字・矢印・数学記号等) は素の識別子で lexical error
-になる**ことを同じ検証で確認済み。絵文字（サロゲートペア文字）に限らず Symbol
-カテゴリ全般が対象。
+(Lo/Lm/Lu/Ll/Lt。CJK 統合漢字・ひらがな・カタカナ・全角英字等) は素の識別子でも安全**。
+それ以外の非 ASCII 文字はカテゴリを問わずエラーになる。Symbol (絵文字・矢印・数学記号) に
+限らず、Punctuation (中黒・句読点・全角括弧)、Number (全角数字)、Separator (全角空白)
+等も対象。全角空白は `Lexical error` とは別のエラーになるが、いずれも NG と判定する。
 
 **この制約を stateDiagram-v2 に適用してはいけない。** mermaid 11.16.0 の
 `mermaid.render()` と GitHub 上の実地検証 (2026-08) では、Symbol・句読点・数字・全角空白を

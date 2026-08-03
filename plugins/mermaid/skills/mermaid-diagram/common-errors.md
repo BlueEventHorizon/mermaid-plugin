@@ -314,11 +314,12 @@ Failed to execute 'btoa' on 'Window': The string to be encoded contains characte
 
 将来的にこのエラーを実際に見かけたら、`github_render_verification.md` で再現・切り分けたうえで本ドキュメントを更新すること。renderer のバージョンアップで再発しうる。
 
-### 8.2 flowchart の素の識別子に Unicode 記号を使うと Lexical error [検証済み 2026-08]
+### 8.2 flowchart の素の識別子では非 ASCII の Letter 以外がエラー [検証済み 2026-08]
 
-こちらは flowchart の実地検証で確認された実在の問題。**Unicode の Symbol カテゴリ
-(絵文字・矢印・数学記号等) の文字をクォートなしで node / subgraph ID に使うと、
-flowchart の lexer がトークン認識に失敗する**。CJK (Letter カテゴリ) はこの問題を起こさない:
+こちらは flowchart の実地検証で確認された実在の問題。**非 ASCII 文字のうち Unicode Letter
+カテゴリ以外をクォートなしで node / subgraph ID に使うとエラーになる**。Symbol
+(絵文字・矢印・数学記号) だけでなく、Punctuation (中黒・句読点・全角括弧)、Number
+(全角数字)、Separator (全角空白) 等も対象。CJK や全角英字などの Letter カテゴリは問題ない:
 
 **Broken** (絵文字):
 
@@ -327,12 +328,14 @@ flowchart TD
     🎉Party --> End2
 ```
 
-**Broken** (絵文字以外の Symbol カテゴリ文字。矢印・数学記号でも同様):
+**Broken** (記号・句読点・全角数字):
 
 ```text
 flowchart TD
     A→B --> C
     f∘g --> C
+    未読・既読 --> C
+    状態０ --> C
 ```
 
 **エラー例**:
@@ -351,13 +354,13 @@ flowchart TD
 ```
 
 判別は Python `unicodedata.category()` で確認できる。flowchart では Letter カテゴリ
-(`Lo`/`Lm`/`Lu`/`Ll`/`Lt`。CJK 統合漢字・ひらがな・カタカナ等) は素の ID でも安全、
-Symbol カテゴリ (`Sm`/`So`/`Sc`/`Sk`。絵文字・矢印・数学記号等) は lexical error になる。
-ラベルとして (クォートして) 使う分には Symbol カテゴリでも問題ない。
+(`Lo`/`Lm`/`Lu`/`Ll`/`Lt`。CJK・ひらがな・カタカナ・全角英字等) は素の ID でも安全。
+それ以外の非 ASCII 文字はカテゴリを問わずエラーになる。全角空白だけは `Lexical error`
+とは別のエラーだが、同様に素の ID には使えない。ラベルとしてクォートすれば問題ない。
 
 **stateDiagram-v2 は別の文法であり、この制約の対象外。** Mermaid 11.16.0 と GitHub 上の
-実地検証では、同じ Symbol カテゴリに加えて句読点・数字・全角空白を含む素の状態 ID も描画できた。
-遷移ラベルだけでなく状態 ID 自体も使用可能。
+実地検証では、これら Letter 以外の文字を含む素の状態 ID も描画できた。遷移ラベルだけでなく
+状態 ID 自体も使用可能。
 
 ---
 
@@ -366,7 +369,7 @@ Symbol カテゴリ (`Sm`/`So`/`Sc`/`Sk`。絵文字・矢印・数学記号等)
 実プロジェクトでの修正履歴ベース:
 
 1. **特殊文字ノーガード**: コロン / 括弧をラベルに直書き → Rule 1 ダブルクォート
-2. **絵文字・記号を flowchart の素の ID に使用**: Unicode Symbol カテゴリの文字が lexer で認識されない → §8.2 ラベルとしてクォート
+2. **Letter 以外の非 ASCII 文字を flowchart の素の ID に使用**: 記号・句読点・全角数字等が lexer で認識されない → §8.2 ラベルとしてクォート
 3. **lowercase `end`**: ノード ID に `end` → `End` に rename
 4. **subgraph ID 混乱**: 「ID を必ず付けろ」と思って必須化 → 「edge を引くときだけ必要」
 5. **flowchart に Note 書く**: 通常ノードで代用

@@ -14,11 +14,11 @@
 - flowchart の未クォート CJK ノードラベル（`[...]` 内）・パイプラベル（`|...|`）
 - クォート済みの数学記号ラベル（mermaid-js issue #4050 の再現、`∘` は Latin-1 範囲外）
 
-**確認済み・唯一の実在問題（ラウンド1、2026-07）**: 絵文字（サロゲートペア文字）を素のノード ID に使うと `Lexical error` になる（`btoa` エラーではない）。`lint_mermaid.py` の `lexical` チェックはこれに対応する。
+**確認済み（ラウンド1、2026-07）**: 絵文字（サロゲートペア文字）を素のノード ID に使うと `Lexical error` になる（`btoa` エラーではない）。`lint_mermaid.py` の `lexical` チェックはこれに対応する。
 
 **確認済み（ラウンド2、2026-08）**:
 
-- flowchart の素の subgraph / node ID に絵文字・矢印・数学記号を使うと `Lexical error`
+- flowchart の素の subgraph / node ID では、非 ASCII の Letter 以外（記号・句読点・全角数字・全角括弧等）がエラー
 - stateDiagram-v2 の遷移ラベルと素の状態 ID では同じ文字を使用可能
 - クォート済みの flowchart subgraph タイトルでは使用可能
 
@@ -56,6 +56,20 @@ flowchart TD
 ```mermaid
 flowchart TD
     f∘g --> C
+```
+
+## 4b. flowchart: 素の識別子に使った句読点（Po）
+
+```mermaid
+flowchart TD
+    未読・既読 --> C
+```
+
+## 4c. flowchart: 素の識別子に使った全角数字（Nd）
+
+```mermaid
+flowchart TD
+    状態０ --> C
 ```
 
 ## 5. 比較用: 絵文字を含む subgraph タイトルをクォートした場合（問題ない想定）

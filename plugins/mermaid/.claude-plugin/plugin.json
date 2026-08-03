@@ -1,8 +1,8 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "mermaid",
-  "description": "Mermaid 図作成のチェックリスト Skill と、その静的検査 Skill。v10+ 構文・renderer 固有の落とし穴（flowchart の絵文字・記号の lexical error 等）をまとめ、機械判定できる分を lint する。",
-  "version": "0.2.1",
+  "description": "Mermaid 図作成のチェックリスト Skill と、その静的検査 Skill。v10+ 構文・renderer 固有の落とし穴（flowchart の非 ASCII・非 Letter 文字によるエラー等）をまとめ、機械判定できる分を lint する。",
+  "version": "0.2.2",
   "author": {
     "name": "BlueEventHorizon"
   },

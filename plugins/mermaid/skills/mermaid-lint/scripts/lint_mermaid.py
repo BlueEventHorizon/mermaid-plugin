@@ -14,8 +14,8 @@
     WARN  意図次第で正しい場合がある。終了コード 0
 
 日本語・CJK ラベル/識別子の未クォートは検査しない。fixtures/github_render_verification.md
-での実地検証 (2026-07) の結果、GitHub 上で問題が再現しなかったため。flowchart では絵文字・
-矢印・数学記号等の Unicode 記号を素の識別子に使うと lexical error になるため検査する。
+での実地検証 (2026-07) の結果、GitHub 上で問題が再現しなかったため。flowchart では
+Unicode Letter 以外の非 ASCII 文字を素の識別子に使うとエラーになるため検査する。
 stateDiagram-v2 は同じ文字を状態 ID に使用できるため検査しない。
 """
 
@@ -64,9 +64,9 @@ def has_unsafe_bare_char(text: str) -> bool:
     github_render_verification.md での実地検証 (2026-07) の結果:
     - Unicode の Letter カテゴリ (Lo/Lm/Lu/Ll/Lt。CJK 統合漢字・ひらがな・カタカナ等) は
       未クォートの識別子でも問題なく描画された
-    - Symbol カテゴリ (Sm/So/Sc/Sk。矢印・数学記号・絵文字等) は素の識別子で
-      `Lexical error` になる (btoa エラーとは別種)
-    ASCII 文字は常に安全。
+    - Letter 以外の非 ASCII 文字 (記号・句読点・全角数字・全角括弧等) は素の識別子で
+      `Lexical error` 等のエラーになる
+    このチェックでは ASCII 文字は対象外。
     """
     for c in text:
         if ord(c) <= 0x7F:
@@ -134,7 +134,8 @@ def lint_flowchart(block: str, offset: int, findings: list[Finding]) -> None:
                     "NG",
                     "lexical",
                     lineno,
-                    f"絵文字・記号等を素の識別子に使うと lexical error になる。ラベルとしてクォートする: {clip(line)}",
+                    "Letter 以外の非 ASCII 文字を素の識別子に使うとエラーになる。"
+                    f"ラベルとしてクォートする: {clip(line)}",
                 )
             )
         if OX_EDGE_RE.search(line):

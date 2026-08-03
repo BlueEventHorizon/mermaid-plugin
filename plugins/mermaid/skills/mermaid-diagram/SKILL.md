@@ -1,7 +1,7 @@
 ---
 name: mermaid-diagram
 description: |
-  Helps avoid common errors when authoring mermaid diagrams (flowchart, sequenceDiagram, classDiagram, stateDiagram-v2, erDiagram, gantt, mindmap). Covers mermaid v10+ syntax pitfalls (reserved word `end`, circle/cross edge misparse, Note keyword scope, comment placement) AND a known flowchart lexer limitation with Unicode Symbol-category characters (emoji, arrows, math symbols) in bare identifiers. Use when creating or editing mermaid diagrams in documentation, README, or design files. Always cross-check official docs at mermaid.js.org for authoritative syntax.
+  Helps avoid common errors when authoring mermaid diagrams (flowchart, sequenceDiagram, classDiagram, stateDiagram-v2, erDiagram, gantt, mindmap). Covers mermaid v10+ syntax pitfalls (reserved word `end`, circle/cross edge misparse, Note keyword scope, comment placement) AND a known flowchart lexer limitation with non-ASCII, non-Letter characters (symbols, punctuation, full-width digits and brackets) in bare identifiers. Use when creating or editing mermaid diagrams in documentation, README, or design files. Always cross-check official docs at mermaid.js.org for authoritative syntax.
 allowed-tools: Write, Edit, Read, WebFetch
 ---
 
@@ -301,12 +301,13 @@ Failed to execute 'btoa' on 'Window': The string to be encoded contains characte
 
 **将来的にこのエラーを実際に見かけたら**: `github_render_verification.md` の該当セクションを使って再現・切り分けし、このドキュメントを更新すること。バージョンアップで再発する可能性がある挙動なので、一次情報 (mermaid.js の changelog、GitHub のレンダラー更新) を疑ってかかること。
 
-### flowchart の素の識別子に Unicode 記号を使うと Lexical error [検証済み 2026-08]
+### flowchart の素の識別子では非 ASCII の Letter 以外がエラー [検証済み 2026-08]
 
-btoa エラーとは別に、flowchart には実地検証で確認された制約がある。**Unicode の Symbol
-カテゴリ (絵文字・矢印・数学記号等) の文字をクォートなしで node / subgraph ID に使うと、
-flowchart の lexer がトークン認識に失敗する**。CJK (Letter カテゴリ) では起きない、
-Symbol カテゴリ特有の問題。
+btoa エラーとは別に、flowchart には実地検証で確認された制約がある。**非 ASCII 文字のうち
+Unicode Letter カテゴリ以外をクォートなしで node / subgraph ID に使うとエラーになる**。
+Symbol (絵文字・矢印・数学記号) だけでなく、Punctuation (中黒・句読点・全角括弧)、
+Number (全角数字)、Separator (全角空白) 等も対象。CJK や全角英字などの Letter
+カテゴリでは起きない。
 
 **Broken** (絵文字):
 
@@ -315,12 +316,14 @@ flowchart TD
     🎉Party --> End2
 ```
 
-**Broken** (絵文字以外の記号。矢印・数学記号でも同様に失敗する):
+**Broken** (記号・句読点・全角数字):
 
 ```text
 flowchart TD
     A→B --> C
     f∘g --> C
+    未読・既読 --> C
+    状態０ --> C
 ```
 
 エラー例:
@@ -335,15 +338,18 @@ flowchart TD 🎉Party --> End2
 
 | カテゴリ | 例 | flowchart の素の ID |
 | ---- | ---- | ---- |
-| Letter (`Lo`/`Lm`/`Lu`/`Ll`/`Lt`) | CJK 統合漢字・ひらがな・カタカナ | ✅ 使える |
+| Letter (`Lo`/`Lm`/`Lu`/`Ll`/`Lt`) | CJK・ひらがな・カタカナ・全角英字 | ✅ 使える |
 | Symbol (`Sm`/`So`/`Sc`/`Sk`) | 絵文字・矢印 (`→`)・数学記号 (`∘`) | ❌ lexical error |
+| Punctuation (`Po`/`Pd`/`Ps` 等) | 中黒・句読点・全角括弧 | ❌ lexical error |
+| Number (`Nd` 等) | 全角数字 (`０`) | ❌ lexical error |
+| Separator (`Zs` 等) | 全角空白 | ❌ 別種のエラー |
 
-flowchart のノードラベルとして (`["🎉Party"]` のようにクォートして) 使う分には Symbol
-カテゴリでも問題ない。素の flowchart ID として使いたい場合は避けるか、ASCII の ID にして
-ラベル側に記号を置くこと。
+flowchart のノードラベルとして (`["未読・既読 ０→１"]` のようにクォートして) 使う分には
+問題ない。素の flowchart ID として使いたい場合は避けるか、ASCII の ID にしてラベル側に
+表示文字を置くこと。
 
 **stateDiagram-v2 へこの制約を一般化してはいけない。** Mermaid 11.16.0 と GitHub 上の
-実地検証では、Symbol・句読点・数字・全角空白を含む素の状態 ID も描画できた。遷移ラベルだけでなく
+実地検証では、これら Letter 以外の文字を含む素の状態 ID も描画できた。遷移ラベルだけでなく
 状態 ID 自体も使用可能であり、flowchart と lexer の許容範囲が異なる。
 
 ---
@@ -359,7 +365,7 @@ mermaid 図を確定する前にチェック:
 - [ ] `Note` keyword を flowchart / classDiagram で使っていないか (sequenceDiagram / stateDiagram-v2 のみ)
 - [ ] classDiagram で関係を書く前に両端の class を宣言したか
 - [ ] `%%` コメントを行末ではなく専用行に書いたか (Rule 8)
-- [ ] 絵文字・矢印・数学記号等の Unicode 記号を識別子 (ノード ID 等) に素のまま使っていないか (ラベルとしてクォートするか ASCII ID にする)
+- [ ] flowchart の素の ID に Letter 以外の非 ASCII 文字（記号・句読点・全角数字・全角括弧等）を使っていないか (ラベルとしてクォートするか ASCII ID にする)
 - [ ] anti-pattern (Broken) 例は `` ```mermaid `` ではなく `` ```text `` ブロックに入れたか (自分自身が壊れないように)
 - [ ] mermaid.live editor で render を確認したか
 
@@ -376,7 +382,7 @@ mermaid 図を確定する前にチェック:
 | `Subgraph X not found`                 | subgraph ID 参照ミス              | Rule 4: edge で参照する subgraph には ID を付ける  |
 | `Syntax error in graph`                | 予約語 `end` を node ID に使った  | Rule 2: `End` 等に rename                          |
 | Unexpected circle/cross arrow          | edge 開始の `o`/`x`               | Rule 3: スペースを挟む                             |
-| `Lexical error ... Unrecognized text`  | 絵文字・記号等を素の識別子に使用  | GitHub Caveats: ラベルとしてクォートするか ASCII ID にする |
+| `Lexical error ... Unrecognized text`  | flowchart の素の ID に Letter 以外の非 ASCII 文字を使用 | GitHub Caveats: ラベルとしてクォートするか ASCII ID にする |
 | `Note is not defined`                  | flowchart で Note keyword 使用    | Rule 5: 通常ノードで代用 or sequenceDiagram に変更 |
 
 ---
