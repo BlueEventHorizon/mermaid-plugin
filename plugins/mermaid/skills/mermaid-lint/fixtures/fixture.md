@@ -1,7 +1,7 @@
 # lint_mermaid.py 検出テスト用フィクスチャ
 
 保守用。各検査が実際に発火することを確認する。
-期待値は **NG 6 件 / WARN 1 件**、終了コード 1。
+期待値は **NG 8 件 / WARN 1 件**、終了コード 1。
 
 ```bash
 ../scripts/lint_mermaid.py fixture.md
@@ -68,7 +68,7 @@ stateDiagram-v2
     全角　空白 --> End3
 ```
 
-## 7b. flowchart: 矢印記号を含む素のノード ID（NG lexical を期待。絵文字以外の Symbol カテゴリ文字も対象）
+## 7b. flowchart: 矢印記号を含む素のノード ID（NG lexical を期待）
 
 ```mermaid
 flowchart TD
@@ -80,6 +80,20 @@ flowchart TD
 ```mermaid
 flowchart TD
     f∘g --> C
+```
+
+## 7d. flowchart: 句読点を含む素のノード ID（NG lexical を期待。Po も対象）
+
+```mermaid
+flowchart TD
+    未読・既読 --> C
+```
+
+## 7e. flowchart: 全角数字を含む素のノード ID（NG lexical を期待。Nd も対象）
+
+```mermaid
+flowchart TD
+    状態０ --> C
 ```
 
 ## 8. CJK は未クォートでも何も出ない（github_render_verification.md で実地検証済み、回帰確認）
