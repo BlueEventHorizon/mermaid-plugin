@@ -55,7 +55,8 @@ NG が 1 件でもあれば終了コード 1。WARN だけなら 0。
 実地検証 (2026-07) の結果、いずれの位置（ノードラベル・subgraph タイトル・エッジ/
 パイプラベル・素のノード ID・stateDiagram の状態 ID/遷移ラベル）でも再現しなかった。
 
-flowchart の `lexical` チェックは Unicode の一般カテゴリで判定する。**Letter カテゴリ
+mermaid 11.16.0 の `mermaid.render()` まで通した検証結果に基づき、flowchart の `lexical`
+チェックは Unicode の一般カテゴリで判定する。**Letter カテゴリ
 (Lo/Lm/Lu/Ll/Lt。CJK 統合漢字・ひらがな・カタカナ・全角英字等) は素の識別子でも安全**。
 それ以外の非 ASCII 文字はカテゴリを問わずエラーになる。Symbol (絵文字・矢印・数学記号) に
 限らず、Punctuation (中黒・句読点・全角括弧)、Number (全角数字)、Separator (全角空白)
@@ -87,5 +88,5 @@ PR プレビューでも rich display エラーが出ないか確認する。
 
 - `mermaid-diagram` — ルールの根拠、公式 docs へのリンク、Broken / Fixed の実例
 - `fixtures/fixture.md` — 各検査が発火することを確認するためのフィクスチャ。保守用
-- `fixtures/github_render_verification.md` — GitHub 上での実地レンダリング検証用フィクスチャ。
-  btoa 系の疑わしい挙動を見かけたら、ここにケースを足して github.com 上で再現・切り分ける
+- `fixtures/github_render_verification.md` — Mermaid 実パーサと GitHub 上でのレンダリング検証記録。
+  一般的な構文は実パーサ、btoa 等の GitHub 固有挙動は github.com 上で再現・切り分ける

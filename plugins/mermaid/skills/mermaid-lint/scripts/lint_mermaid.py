@@ -61,7 +61,7 @@ class Finding:
 def has_unsafe_bare_char(text: str) -> bool:
     """mermaid の lexer が素の識別子で認識できない文字を含むか。
 
-    github_render_verification.md での実地検証 (2026-07) の結果:
+    mermaid 11.16.0 の `mermaid.render()` まで通した実地検証 (2026-08) の結果:
     - Unicode の Letter カテゴリ (Lo/Lm/Lu/Ll/Lt。CJK 統合漢字・ひらがな・カタカナ等) は
       未クォートの識別子でも問題なく描画された
     - Letter 以外の非 ASCII 文字 (記号・句読点・全角数字・全角括弧等) は素の識別子で

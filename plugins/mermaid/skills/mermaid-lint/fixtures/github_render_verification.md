@@ -1,8 +1,22 @@
-# GitHub レンダリング実地検証用フィクスチャ
+# Mermaid レンダリング実地検証用フィクスチャ
 
-`mermaid-lint` の btoa 系ルールのうち、根拠が推測ベースだったものを実地検証するための資料。
+`mermaid-lint` の文字カテゴリ関連ルールを、実パーサと GitHub レンダラーで切り分けるための資料。
 
-**使い方**: このファイルを GitHub.com 上で直接開き（`https://github.com/<org>/<repo>/blob/<branch>/plugins/mermaid/skills/mermaid-lint/fixtures/github_render_verification.md`）、各セクションの図が「Unable to render rich display」エラーなく描画されるかを目視確認する。
+## 検証方法
+
+### 実パーサ（ルール判定の主な根拠）
+
+mermaid 11.16.0 と jsdom を使い、DOM と `getBBox()` 等を用意したうえで
+`mermaid.render()` まで実行した。`mermaid.parse()` だけでなくレイアウト処理まで通している。
+文字カテゴリを網羅的に比較でき、同じバージョンで再現できるため、一般的な構文・lexer 挙動は
+この結果を根拠とする。
+
+### GitHub レンダラー（GitHub 固有挙動の確認）
+
+このファイルを GitHub.com 上で直接開き、各セクションの図が
+「Unable to render rich display」になるかを目視確認する。GitHub の Mermaid
+バージョンは固定・公開されていないため、btoa 等の GitHub 固有差分を疑う場合に使う。
+実パーサの結果と GitHub の結果を混同しない。
 
 **確認済み（ラウンド1、2026-07）**: いずれも未クォートで問題なし。
 
@@ -16,15 +30,32 @@
 
 **確認済み（ラウンド1、2026-07）**: 絵文字（サロゲートペア文字）を素のノード ID に使うと `Lexical error` になる（`btoa` エラーではない）。`lint_mermaid.py` の `lexical` チェックはこれに対応する。
 
-**確認済み（ラウンド2、2026-08）**:
+**確認済み（ラウンド2、2026-08、mermaid 11.16.0 `render()`）**:
 
-- flowchart の素の subgraph / node ID では、非 ASCII の Letter 以外（記号・句読点・全角数字・全角括弧等）がエラー
-- stateDiagram-v2 の遷移ラベルと素の状態 ID では同じ文字を使用可能
-- クォート済みの flowchart subgraph タイトルでは使用可能
+| ケース | 内容 | 結果 |
+| --- | --- | --- |
+| 1 | flowchart: 絵文字を含む素の subgraph ID | `Lexical error` |
+| 2 | stateDiagram-v2: 絵文字を含む遷移ラベル | OK |
+| 3 | flowchart: 素の ID の矢印記号 `→` | `Lexical error` |
+| 4 | flowchart: 素の ID の数学記号 `∘` | `Lexical error` |
+| 4b | flowchart: 素の ID の句読点 `・` (Po) | `Lexical error` |
+| 4c | flowchart: 素の ID の全角数字 `０` (Nd) | `Lexical error` |
+| 5 | flowchart: クォートした絵文字 subgraph タイトル | OK |
+| 6 | stateDiagram-v2: 記号等を含む素の状態 ID | OK |
 
-stateDiagram-v2 の状態 ID は Mermaid 11.16.0 の `mermaid.render()` でも、GitHub 上の
-[Issue #1](https://github.com/BlueEventHorizon/mermaid-plugin/issues/1) でも描画を確認した。
-flowchart と stateDiagram-v2 は同じ lexical 制約を持たない。
+追加の位置別検証:
+
+| ケース | 結果 |
+| --- | --- |
+| flowchart: 素の subgraph ID に CJK (`subgraph App層`) | OK |
+| flowchart: 素の subgraph ID に Po (`subgraph App・層`) | `Lexical error` |
+| flowchart: 未クォートノードラベル `[未読・既読]` | OK |
+| flowchart: 未クォートパイプラベル `|実装・検証|` | OK |
+| flowchart: 未クォートノードラベル `[未読(初期)]` | `Parse error` |
+
+素の node / subgraph ID は Letter 以外の非 ASCII 文字がエラーになる一方、ラベル位置では
+Po も使用できる。ラベルを壊す ASCII の構文文字とは別問題である。また stateDiagram-v2 は
+同じ lexical 制約を持たない。
 
 ## 1. flowchart: 絵文字を含む素の subgraph ID
 
@@ -89,4 +120,43 @@ stateDiagram-v2
     A→B --> f∘g
     f∘g --> 未読・既読
     未読・既読 --> 全角　空白
+```
+
+## 7. flowchart: 素の subgraph ID に CJK
+
+```mermaid
+flowchart TD
+    subgraph App層
+        Foo --> Bar
+    end
+```
+
+## 8. flowchart: 素の subgraph ID に句読点（Po）
+
+```mermaid
+flowchart TD
+    subgraph App・層
+        Foo --> Bar
+    end
+```
+
+## 9. flowchart: 未クォートノードラベルに句読点（Po）
+
+```mermaid
+flowchart TD
+    A[未読・既読] --> B
+```
+
+## 10. flowchart: 未クォートパイプラベルに句読点（Po）
+
+```mermaid
+flowchart TD
+    A -->|実装・検証| B
+```
+
+## 11. flowchart: 未クォートノードラベルに ASCII の構文文字
+
+```mermaid
+flowchart TD
+    A[未読(初期)] --> B
 ```
