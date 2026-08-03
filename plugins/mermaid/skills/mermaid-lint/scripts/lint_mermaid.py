@@ -38,7 +38,7 @@ FLOWCHART_KINDS = {"flowchart", "graph"}
 EDGE_LABEL_RE = re.compile(r'--\s*([^-|>\n"]+?)\s*--[->]')
 PIPE_LABEL_RE = re.compile(r'\|([^"|\n]+)\|')
 # ドット付きリンクのラベル記法 `A -. text .-> B`。EDGE_LABEL_RE は `--` 形式専用のため別枠で扱う。
-DOTTED_EDGE_LABEL_RE = re.compile(r'-\.\s*([^.\n]+?)\s*\.-')
+DOTTED_EDGE_LABEL_RE = re.compile(r"-\.\s*([^.\n]+?)\s*\.-")
 
 QUOTED_RE = re.compile(r'"[^"\n]*"')
 BRACKETED_RE = re.compile(r"\[[^\[\]\n]*\]|\([^()\n]*\)|\{[^{}\n]*\}")
@@ -114,17 +114,26 @@ def lint_flowchart(block: str, offset: int, findings: list[Finding]) -> None:
 
         if "%%" in line:
             findings.append(
-                Finding("NG", "comment", lineno, f"行末 %% コメントは parse error: {clip(line)}")
+                Finding(
+                    "NG",
+                    "comment",
+                    lineno,
+                    f"行末 %% コメントは parse error: {clip(line)}",
+                )
             )
         if re.search(r"(-->|---|\bsubgraph\b)\s+end\b", line) or re.match(
             r"^\s*end\s*(\[|\(|\{)", line
         ):
             findings.append(
-                Finding("NG", "end", lineno, f"ノード ID に lowercase end: {clip(line)}")
+                Finding(
+                    "NG", "end", lineno, f"ノード ID に lowercase end: {clip(line)}"
+                )
             )
         if NOTE_RE.match(line):
             findings.append(
-                Finding("NG", "note", lineno, f"flowchart は Note を持たない: {clip(line)}")
+                Finding(
+                    "NG", "note", lineno, f"flowchart は Note を持たない: {clip(line)}"
+                )
             )
         # 行末コメントは上で報告済み。以降の検査ではコメント本文を対象から外す。
         code_part = line.split("%%")[0]
@@ -191,7 +200,9 @@ def lint_text(text: str, as_markdown: bool) -> list[Finding]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("paths", nargs="+", metavar="FILE", help="検査対象。`-` で標準入力")
+    parser.add_argument(
+        "paths", nargs="+", metavar="FILE", help="検査対象。`-` で標準入力"
+    )
     parser.add_argument(
         "--format",
         choices=("auto", "markdown", "mermaid"),
@@ -212,7 +223,9 @@ def main() -> int:
                 return 1
             text, label = target.read_text(encoding="utf-8"), str(target)
 
-        as_markdown = "```mermaid" in text if args.format == "auto" else args.format == "markdown"
+        as_markdown = (
+            "```mermaid" in text if args.format == "auto" else args.format == "markdown"
+        )
         blocks += len(blocks_of(text, as_markdown))
 
         for finding in lint_text(text, as_markdown):
@@ -225,7 +238,9 @@ def main() -> int:
         return 1
 
     print(f"OK  mermaid ブロック {blocks} 個に NG はありません。")
-    print("静的検査はパーサーの代わりにはなりません。https://mermaid.live/ で描画も確認してください。")
+    print(
+        "静的検査はパーサーの代わりにはなりません。https://mermaid.live/ で描画も確認してください。"
+    )
     return 0
 
 

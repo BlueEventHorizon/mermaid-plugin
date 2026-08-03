@@ -17,7 +17,7 @@ allowed-tools: Bash(${CLAUDE_SKILL_DIR}/scripts/lint_mermaid.py *)
 ${CLAUDE_SKILL_DIR}/scripts/lint_mermaid.py <FILE>...
 ```
 
-Markdown なら ` ```mermaid ` ブロックを抽出して検査する。`.mmd` などはファイル全体を 1 つの図として扱う。
+Markdown なら `` ```mermaid `` ブロックを抽出して検査する。`.mmd` などはファイル全体を 1 つの図として扱う。
 
 文書の一部だけを検査したいときは標準入力を使う。
 
@@ -28,27 +28,27 @@ sed -n '40,80p' design.md | ${CLAUDE_SKILL_DIR}/scripts/lint_mermaid.py -
 既存の図に手を入れられない文書で、**自分が書き足した箇所だけ**を検査したい場合にこれを使う。
 ファイル全体を渡すと既存分の NG まで拾ってしまう。
 
-`--format markdown|mermaid` で判定を固定できる。既定の `auto` は ` ```mermaid ` の有無で決める。
+`--format markdown|mermaid` で判定を固定できる。既定の `auto` は `` ```mermaid `` の有無で決める。
 
 ## 判定
 
 NG が 1 件でもあれば終了コード 1。WARN だけなら 0。
 
-| 判定 | 意味 |
-| ---- | ---- |
-| NG | 構文が壊れる |
+| 判定 | 意味                       |
+| ---- | -------------------------- |
+| NG   | 構文が壊れる               |
 | WARN | 意図次第で正しい場合がある |
 
 ### 検査項目
 
-| check | 判定 | 内容 |
-| ---- | ---- | ---- |
-| `lexical` | NG | flowchart の素のノード ID に Letter 以外の非 ASCII 文字（記号・句読点・全角数字・全角括弧等を含む）。ID ではなくラベルにする |
-| `end` | NG | ノード ID に lowercase `end`。`subgraph` 終端と衝突する |
-| `comment` | NG | flowchart の行末 `%%` コメント |
-| `note` | NG | flowchart / classDiagram での `Note` キーワード |
-| `fence` | NG | Markdown のコードフェンスが閉じていない |
-| `ox-edge` | WARN | `A---oBar` が circle/cross edge と解釈される |
+| check     | 判定 | 内容                                                                                                                         |
+| --------- | ---- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `lexical` | NG   | flowchart の素のノード ID に Letter 以外の非 ASCII 文字（記号・句読点・全角数字・全角括弧等を含む）。ID ではなくラベルにする |
+| `end`     | NG   | ノード ID に lowercase `end`。`subgraph` 終端と衝突する                                                                      |
+| `comment` | NG   | flowchart の行末 `%%` コメント                                                                                               |
+| `note`    | NG   | flowchart / classDiagram での `Note` キーワード                                                                              |
+| `fence`   | NG   | Markdown のコードフェンスが閉じていない                                                                                      |
+| `ox-edge` | WARN | `A---oBar` が circle/cross edge と解釈される                                                                                 |
 
 **日本語・CJK ラベル/識別子の未クォートは検査しない。** GitHub 上での btoa Latin-1
 エラーという既知の問題があったが、`fixtures/github_render_verification.md` での

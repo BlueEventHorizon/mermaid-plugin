@@ -39,10 +39,10 @@ skill を `.claude/skills/<name>/` (Claude Code 用) または `.agents/skills/<
 
 リポジトリルートに 2 つの script を追加する:
 
-| script           | 配置先 path                                            |
-| ---------------- | ------------------------------------------------------ |
-| `setup-claude.sh` | `<project>/.claude/skills/mermaid-diagram/`            |
-| `setup-codex.sh`  | `<project>/.agents/skills/mermaid-diagram/`            |
+| script            | 配置先 path                                 |
+| ----------------- | ------------------------------------------- |
+| `setup-claude.sh` | `<project>/.claude/skills/mermaid-diagram/` |
+| `setup-codex.sh`  | `<project>/.agents/skills/mermaid-diagram/` |
 
 それぞれ `--global` 指定で user-global location (`~/.claude/skills/` / `~/.agents/skills/`) にも配置できる。
 
@@ -53,13 +53,13 @@ setup-claude.sh PROJECT_DIR [--force] [--dry-run] [--uninstall]
 setup-claude.sh --global    [--force] [--dry-run] [--uninstall]
 ```
 
-| 引数           | 動作                                                                                                |
-| -------------- | --------------------------------------------------------------------------------------------------- |
-| `PROJECT_DIR`  | `PROJECT_DIR/.claude/skills/mermaid-diagram/` に本リポジトリの skill ファイル一式を **copy** で配置 |
-| `--global`     | `~/.claude/skills/mermaid-diagram/` に copy で配置 (`PROJECT_DIR` と排他)                           |
-| `--force`      | 既存ファイルがあれば上書き                                                                          |
-| `--dry-run`    | 実際の変更なし。操作内容を `DRY-RUN:` プレフィックス付きで stdout に出力                            |
-| `--uninstall`  | 既存 install を削除 (`--force` 不要)                                                                |
+| 引数          | 動作                                                                                                |
+| ------------- | --------------------------------------------------------------------------------------------------- |
+| `PROJECT_DIR` | `PROJECT_DIR/.claude/skills/mermaid-diagram/` に本リポジトリの skill ファイル一式を **copy** で配置 |
+| `--global`    | `~/.claude/skills/mermaid-diagram/` に copy で配置 (`PROJECT_DIR` と排他)                           |
+| `--force`     | 既存ファイルがあれば上書き                                                                          |
+| `--dry-run`   | 実際の変更なし。操作内容を `DRY-RUN:` プレフィックス付きで stdout に出力                            |
+| `--uninstall` | 既存 install を削除 (`--force` 不要)                                                                |
 
 ### 操作要件: `setup-codex.sh`
 
@@ -90,32 +90,32 @@ setup-codex.sh --global    [--force] [--dry-run] [--uninstall]
 
 ### 非機能要件
 
-| カテゴリ       | 要件                                                                                                                                             |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 通信           | network 通信を一切行わない (offline / air-gapped 環境対応)                                                                                       |
-| 副作用範囲     | `<PROJECT_DIR>/.claude/`, `<PROJECT_DIR>/.agents/`, `~/.claude/skills/`, `~/.agents/skills/` の **配置先サブツリー以外は mutate しない**         |
-| 冪等性         | `--force` 付きで複数回実行しても同じ結果になる                                                                                                   |
-| OS 対応        | macOS / Linux / WSL を正式サポート。Windows ネイティブ (PowerShell) は非対応 (README で WSL / Git Bash 推奨を明記する)                           |
-| 依存最小化     | bash と POSIX 互換ユーティリティのみに依存。ruby / python / node 等の追加 runtime を要求しない                                                   |
-| セキュリティ   | sudo / root 権限を要求しない。target 外のファイルを読み書きしない                                                                                |
+| カテゴリ     | 要件                                                                                                                                     |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| 通信         | network 通信を一切行わない (offline / air-gapped 環境対応)                                                                               |
+| 副作用範囲   | `<PROJECT_DIR>/.claude/`, `<PROJECT_DIR>/.agents/`, `~/.claude/skills/`, `~/.agents/skills/` の **配置先サブツリー以外は mutate しない** |
+| 冪等性       | `--force` 付きで複数回実行しても同じ結果になる                                                                                           |
+| OS 対応      | macOS / Linux / WSL を正式サポート。Windows ネイティブ (PowerShell) は非対応 (README で WSL / Git Bash 推奨を明記する)                   |
+| 依存最小化   | bash と POSIX 互換ユーティリティのみに依存。ruby / python / node 等の追加 runtime を要求しない                                           |
+| セキュリティ | sudo / root 権限を要求しない。target 外のファイルを読み書きしない                                                                        |
 
 ### 用語
 
-| 用語                   | 定義                                                                                                                                                          |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| project-local install  | target project の `.claude/skills/<name>/` または `.agents/skills/<name>/` に skill を配置すること。project に commit され、project 単位で利用可能になる    |
-| user-global install    | `~/.claude/skills/<name>/` または `~/.agents/skills/<name>/` に skill を配置すること。当該 OS user のすべての project で利用可能になる                       |
-| vendor (動詞)          | 外部から取得した資産を自プロジェクト内に取り込み、自前管理下に置くこと。本要件では「skill ファイルを target project にコピーする」ことを指す                  |
+| 用語                  | 定義                                                                                                                                                     |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| project-local install | target project の `.claude/skills/<name>/` または `.agents/skills/<name>/` に skill を配置すること。project に commit され、project 単位で利用可能になる |
+| user-global install   | `~/.claude/skills/<name>/` または `~/.agents/skills/<name>/` に skill を配置すること。当該 OS user のすべての project で利用可能になる                   |
+| vendor (動詞)         | 外部から取得した資産を自プロジェクト内に取り込み、自前管理下に置くこと。本要件では「skill ファイルを target project にコピーする」ことを指す             |
 
 ## 未確定事項
 
-| ID      | 内容                                                                                                                                              | 期限       |
-| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| ID      | 内容                                                                                                                                             | 期限       |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- |
 | TBD-001 | 配置先に既存ファイル / symlink が存在する状態で `--force` 上書きを実行したあと、最終状態はユーザーから見てどうあるべきか (新規 install と同等か) | 設計開始前 |
 
 ## 変更履歴
 
-| 日付       | 変更者  | 内容                                                                                                                                          |
-| ---------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-05-23 | k2moons | 初版作成                                                                                                                                      |
+| 日付       | 変更者  | 内容                                                                                                                                                       |
+| ---------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-05-23 | k2moons | 初版作成                                                                                                                                                   |
 | 2026-05-23 | k2moons | /forge:review 由来の minor 指摘 4 件を反映 (メタデータ「機能名」削除 / TBD-001 を What 表現に / 依存最小化のコマンド列挙簡略化 / 概要と達成手段の重複削減) |

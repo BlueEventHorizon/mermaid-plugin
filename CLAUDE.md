@@ -54,7 +54,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 `plugins/mermaid/skills/mermaid-diagram/SKILL.md` 自身が mermaid 図の正しい書き方を扱うので、自己言及の罠がある:
 
 - SKILL.md 内で mermaid サンプルを書くなら、SKILL.md 自身が説いているルール（ダブルクォート escape、flowchart の素の ID に Letter 以外の非 ASCII 文字を使わない、`%%` 専用行など）を守る
-- **Broken 例は ` ```mermaid ` ではなく ` ```text ` ブロックに入れる**。GitHub renderer で本文書自体が parse error になるのを防ぐ
+- **Broken 例は `` ```mermaid `` ではなく `` ```text `` ブロックに入れる**。GitHub renderer で本文書自体が parse error になるのを防ぐ
 - 例の改訂時は GitHub レンダラーでの表示も確認する (README は GitHub で表示されるため特に)
 
 ## バージョン管理
@@ -68,15 +68,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 仕様変更があると配布形態に直接影響する。`marketplace.json` / `plugin.json` / レイアウトを大きく変える前に、該当する一次情報を WebFetch で再確認すること。
 
-| 領域 | 一次情報 URL |
-|---|---|
-| Claude Code plugin manifest | https://code.claude.com/docs/en/plugins-reference |
+| 領域                            | 一次情報 URL                                        |
+| ------------------------------- | --------------------------------------------------- |
+| Claude Code plugin manifest     | https://code.claude.com/docs/en/plugins-reference   |
 | Claude Code plugin marketplaces | https://code.claude.com/docs/en/plugin-marketplaces |
-| Discover and install plugins | https://code.claude.com/docs/en/discover-plugins |
-| Claude Code plugins overview | https://code.claude.com/docs/en/plugins |
-| Codex Skills (.agents/skills/) | https://developers.openai.com/codex/skills |
-| AGENTS.md 規格 | https://agents.md/ |
-| mermaid 公式 | https://mermaid.js.org/ |
+| Discover and install plugins    | https://code.claude.com/docs/en/discover-plugins    |
+| Claude Code plugins overview    | https://code.claude.com/docs/en/plugins             |
+| Codex Skills (.agents/skills/)  | https://developers.openai.com/codex/skills          |
+| AGENTS.md 規格                  | https://agents.md/                                  |
+| mermaid 公式                    | https://mermaid.js.org/                             |
 
 ## このリポジトリでよく使う user skills
 

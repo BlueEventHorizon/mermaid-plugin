@@ -4,10 +4,10 @@ Mermaid 図を書くときに AI が見落としがちな**暗黙ルール**と*
 
 Skill は 2 つある。
 
-| Skill | 役割 |
-| ---- | ---- |
-| `mermaid-diagram` | ルールの知識ベース。書く前に読む |
-| `mermaid-lint` | 書いた図の静的検査。機械判定できる分だけを見る |
+| Skill             | 役割                                           |
+| ----------------- | ---------------------------------------------- |
+| `mermaid-diagram` | ルールの知識ベース。書く前に読む               |
+| `mermaid-lint`    | 書いた図の静的検査。機械判定できる分だけを見る |
 
 ルールの根拠は `mermaid-diagram` を正とし、`mermaid-lint` は判定だけを担う。二重管理を避けるため。
 
@@ -25,7 +25,7 @@ Skill は 2 つある。
 詳細は [`plugins/mermaid/skills/mermaid-diagram/SKILL.md`](plugins/mermaid/skills/mermaid-diagram/SKILL.md) と実例ベースのトラブルシュート集 [`common-errors.md`](plugins/mermaid/skills/mermaid-diagram/common-errors.md) を参照。
 
 上のうち機械判定できるものは [`mermaid-lint`](plugins/mermaid/skills/mermaid-lint/SKILL.md) が検査する。
-標準ライブラリのみの Python スクリプトで、Markdown 内の ` ```mermaid ` ブロックを抽出して検査する。
+標準ライブラリのみの Python スクリプトで、Markdown 内の `` ```mermaid `` ブロックを抽出して検査する。
 mermaid パーサーは使わないため構文エラーを網羅しない。描画の最終確認は <https://mermaid.live/> で行う。
 
 ## インストール

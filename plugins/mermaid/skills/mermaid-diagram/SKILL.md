@@ -230,6 +230,7 @@ classDiagram
 ```
 
 ポイント:
+
 - メソッドの戻り値の前にコロンを書かない (`run(arg) Result` であって `run(arg): Result` ではない)
 - 関係 (`Foo <|-- Bar`) を書く時点で両端の class が宣言済みであること
 
@@ -336,13 +337,13 @@ flowchart TD 🎉Party --> End2
 
 判別の目安 (Python `unicodedata.category()` で確認可能):
 
-| カテゴリ | 例 | flowchart の素の ID |
-| ---- | ---- | ---- |
-| Letter (`Lo`/`Lm`/`Lu`/`Ll`/`Lt`) | CJK・ひらがな・カタカナ・全角英字 | ✅ 使える |
-| Symbol (`Sm`/`So`/`Sc`/`Sk`) | 絵文字・矢印 (`→`)・数学記号 (`∘`) | ❌ lexical error |
-| Punctuation (`Po`/`Pd`/`Ps` 等) | 中黒・句読点・全角括弧 | ❌ lexical error |
-| Number (`Nd` 等) | 全角数字 (`０`) | ❌ lexical error |
-| Separator (`Zs` 等) | 全角空白 | ❌ 別種のエラー |
+| カテゴリ                          | 例                                 | flowchart の素の ID |
+| --------------------------------- | ---------------------------------- | ------------------- |
+| Letter (`Lo`/`Lm`/`Lu`/`Ll`/`Lt`) | CJK・ひらがな・カタカナ・全角英字  | ✅ 使える           |
+| Symbol (`Sm`/`So`/`Sc`/`Sk`)      | 絵文字・矢印 (`→`)・数学記号 (`∘`) | ❌ lexical error    |
+| Punctuation (`Po`/`Pd`/`Ps` 等)   | 中黒・句読点・全角括弧             | ❌ lexical error    |
+| Number (`Nd` 等)                  | 全角数字 (`０`)                    | ❌ lexical error    |
+| Separator (`Zs` 等)               | 全角空白                           | ❌ 別種のエラー     |
 
 flowchart のノードラベルとして (`["未読・既読 ０→１"]` のようにクォートして) 使う分には
 問題ない。素の flowchart ID として使いたい場合は避けるか、ASCII の ID にしてラベル側に
@@ -376,14 +377,14 @@ mermaid 図を確定する前にチェック:
 実例ベースのエラーパターンは [common-errors.md](common-errors.md) を参照。
 **読むタイミング**: 症状や parse error メッセージから原因を逆引きしたい / 自分の図と類似する Broken パターンを探したい / 公式 docs だけでは判断がつかない とき。
 
-| エラーメッセージ                       | 推定原因                          | 対処                                               |
-| -------------------------------------- | --------------------------------- | -------------------------------------------------- |
-| `Parse error on line X`                | ラベル内の特殊文字                | Rule 1: ダブルクォート or HTML entity              |
-| `Subgraph X not found`                 | subgraph ID 参照ミス              | Rule 4: edge で参照する subgraph には ID を付ける  |
-| `Syntax error in graph`                | 予約語 `end` を node ID に使った  | Rule 2: `End` 等に rename                          |
-| Unexpected circle/cross arrow          | edge 開始の `o`/`x`               | Rule 3: スペースを挟む                             |
-| `Lexical error ... Unrecognized text`  | flowchart の素の ID に Letter 以外の非 ASCII 文字を使用 | GitHub Caveats: ラベルとしてクォートするか ASCII ID にする |
-| `Note is not defined`                  | flowchart で Note keyword 使用    | Rule 5: 通常ノードで代用 or sequenceDiagram に変更 |
+| エラーメッセージ                      | 推定原因                                                | 対処                                                       |
+| ------------------------------------- | ------------------------------------------------------- | ---------------------------------------------------------- |
+| `Parse error on line X`               | ラベル内の特殊文字                                      | Rule 1: ダブルクォート or HTML entity                      |
+| `Subgraph X not found`                | subgraph ID 参照ミス                                    | Rule 4: edge で参照する subgraph には ID を付ける          |
+| `Syntax error in graph`               | 予約語 `end` を node ID に使った                        | Rule 2: `End` 等に rename                                  |
+| Unexpected circle/cross arrow         | edge 開始の `o`/`x`                                     | Rule 3: スペースを挟む                                     |
+| `Lexical error ... Unrecognized text` | flowchart の素の ID に Letter 以外の非 ASCII 文字を使用 | GitHub Caveats: ラベルとしてクォートするか ASCII ID にする |
+| `Note is not defined`                 | flowchart で Note keyword 使用                          | Rule 5: 通常ノードで代用 or sequenceDiagram に変更         |
 
 ---
 
