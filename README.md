@@ -1,6 +1,15 @@
 # mermaid-plugin
 
-Mermaid 図を書くときに AI が見落としがちな**暗黙ルール**と**主要 renderer 固有の制約**（特に GitHub の `btoa` Latin-1 エラー）を最小セットでまとめた Skill を、**Claude Code Plugin marketplace** と **OpenAI Codex CLI Skill** の両規格で配布する単独リポジトリ。
+Mermaid 図を書くときに AI が見落としがちな**暗黙ルール**と**主要 renderer 固有の制約**（絵文字・矢印・数学記号等を素の識別子に使った際の lexical error 等）を最小セットでまとめた Skill を、**Claude Code Plugin marketplace** と **OpenAI Codex CLI Skill** の両規格で配布する単独リポジトリ。
+
+Skill は 2 つある。
+
+| Skill | 役割 |
+| ---- | ---- |
+| `mermaid-diagram` | ルールの知識ベース。書く前に読む |
+| `mermaid-lint` | 書いた図の静的検査。機械判定できる分だけを見る |
+
+ルールの根拠は `mermaid-diagram` を正とし、`mermaid-lint` は判定だけを担う。二重管理を避けるため。
 
 ## 何を解決するか
 
@@ -11,9 +20,13 @@ Mermaid 図を書くときに AI が見落としがちな**暗黙ルール**と*
 - ✅ `Note` / `note` が使える diagram 種別の整理
 - ✅ classDiagram の前方参照・method 戻り値構文
 - ✅ `%%` コメントは専用行のみ (行末コメントは parse error)
-- ✅ **GitHub renderer の `btoa()` Latin-1 エラー**（日本語・中国語・ハングル・絵文字ラベル）
+- ✅ 絵文字・矢印・数学記号等（Unicode Symbol カテゴリ）を素の識別子に使うと lexical error になる問題の回避
 
 詳細は [`plugins/mermaid/skills/mermaid-diagram/SKILL.md`](plugins/mermaid/skills/mermaid-diagram/SKILL.md) と実例ベースのトラブルシュート集 [`common-errors.md`](plugins/mermaid/skills/mermaid-diagram/common-errors.md) を参照。
+
+上のうち機械判定できるものは [`mermaid-lint`](plugins/mermaid/skills/mermaid-lint/SKILL.md) が検査する。
+標準ライブラリのみの Python スクリプトで、Markdown 内の ` ```mermaid ` ブロックを抽出して検査する。
+mermaid パーサーは使わないため構文エラーを網羅しない。描画の最終確認は <https://mermaid.live/> で行う。
 
 ## インストール
 
@@ -36,6 +49,7 @@ Mermaid 図を書くときに AI が見落としがちな**暗黙ルール**と*
 
 ```
 /mermaid:mermaid-diagram
+/mermaid:mermaid-lint
 ```
 
 > 参考: [Discover and install plugins](https://code.claude.com/docs/en/discover-plugins) — `/plugin install <url>` のような直接 URL 指定はなく、`marketplace add` + `install` の 2 ステップが正規。
@@ -60,9 +74,10 @@ git clone https://github.com/BlueEventHorizon/mermaid-plugin ~/tools/mermaid-plu
 # 2. プロジェクトの .agents/skills/ から symlink
 mkdir -p .agents/skills
 ln -s ~/tools/mermaid-plugin/plugins/mermaid/skills/mermaid-diagram .agents/skills/mermaid-diagram
+ln -s ~/tools/mermaid-plugin/plugins/mermaid/skills/mermaid-lint .agents/skills/mermaid-lint
 ```
 
-個人全プロジェクト用なら `~/.agents/skills/mermaid-diagram` に symlink。
+個人全プロジェクト用なら `~/.agents/skills/` 配下に symlink。
 
 ## リポジトリ構成
 
@@ -75,12 +90,18 @@ mermaid-plugin/                                  # repo = marketplace
 │       ├── .claude-plugin/
 │       │   └── plugin.json                      # plugin manifest
 │       ├── skills/
-│       │   └── mermaid-diagram/                 # canonical skill location
+│       │   ├── mermaid-diagram/                 # canonical skill location
+│       │   │   ├── SKILL.md
+│       │   │   └── common-errors.md
+│       │   └── mermaid-lint/
 │       │       ├── SKILL.md
-│       │       └── common-errors.md
+│       │       └── scripts/
+│       │           ├── lint_mermaid.py          # 標準ライブラリのみ
+│       │           └── fixture.md               # 検出テスト用（保守用）
 │       └── .agents/
 │           └── skills/
-│               └── mermaid-diagram → ../../skills/mermaid-diagram   # Codex 互換 symlink
+│               ├── mermaid-diagram → ../../skills/mermaid-diagram   # Codex 互換 symlink
+│               └── mermaid-lint → ../../skills/mermaid-lint
 ├── README.md
 ├── CLAUDE.md
 ├── LICENSE
@@ -91,8 +112,13 @@ mermaid-plugin/                                  # repo = marketplace
 
 - **リポジトリルート** = marketplace (catalog として `.claude-plugin/marketplace.json` を持つ)
 - **`plugins/mermaid/`** = 個別の plugin (`.claude-plugin/plugin.json` を持つ)
-- **`plugins/mermaid/skills/mermaid-diagram/`** = skill 本体 (実体)
-- **`plugins/mermaid/.agents/skills/mermaid-diagram`** = 同一スキルへの Codex 用 symlink
+- **`plugins/mermaid/skills/<skill>/`** = skill 本体 (実体)
+- **`plugins/mermaid/.agents/skills/<skill>`** = 同一スキルへの Codex 用 symlink
+
+skill に同梱したスクリプトは `${CLAUDE_SKILL_DIR}` で参照する。plugin skill では
+skill 自身のサブディレクトリに解決され、SKILL.md 本文と `allowed-tools` の Bash ルールの
+両方で置換されるため、許可プロンプトなしで実行できる（Claude Code v2.1.129 以降）。
+`${CLAUDE_PLUGIN_ROOT}` は本文では展開されるが `allowed-tools` での置換は明記がない。
 
 ## 仕様準拠の確認
 
@@ -112,6 +138,14 @@ claude plugin validate ./plugins/mermaid --strict
 # symlink 解決
 readlink plugins/mermaid/.agents/skills/mermaid-diagram
 # 期待: ../../skills/mermaid-diagram
+
+# lint の検出テスト（NG 6 件 / WARN 2 件、終了コード 1 になること）
+cd plugins/mermaid/skills/mermaid-lint/scripts && ./lint_mermaid.py fixture.md
+
+# lint の誤検出テスト（NG 0 件になること）
+plugins/mermaid/skills/mermaid-lint/scripts/lint_mermaid.py \
+  plugins/mermaid/skills/mermaid-diagram/SKILL.md \
+  plugins/mermaid/skills/mermaid-diagram/common-errors.md
 ```
 
 ## 出典

@@ -1,7 +1,7 @@
 ---
 name: mermaid-diagram
 description: |
-  Helps avoid common errors when authoring mermaid diagrams (flowchart, sequenceDiagram, classDiagram, stateDiagram-v2, erDiagram, gantt, mindmap). Covers mermaid v10+ syntax pitfalls AND renderer-specific caveats — most importantly GitHub's btoa Latin-1 error for non-ASCII labels (Japanese / CJK / emoji). Use when creating or editing mermaid diagrams in documentation, README, or design files. Always cross-check official docs at mermaid.js.org for authoritative syntax.
+  Helps avoid common errors when authoring mermaid diagrams (flowchart, sequenceDiagram, classDiagram, stateDiagram-v2, erDiagram, gantt, mindmap). Covers mermaid v10+ syntax pitfalls (reserved word `end`, circle/cross edge misparse, Note keyword scope, comment placement) AND a known lexer limitation with Unicode Symbol-category characters (emoji, arrows, math symbols) in bare identifiers. Use when creating or editing mermaid diagrams in documentation, README, or design files. Always cross-check official docs at mermaid.js.org for authoritative syntax.
 allowed-tools: Write, Edit, Read, WebFetch
 ---
 
@@ -280,51 +280,62 @@ flowchart TD
 
 ---
 
-## GitHub Rendering Caveats [MANDATORY]
+## GitHub Rendering Caveats
 
-GitHub README / Issue / PR で mermaid を表示すると、内部で SVG 化のため `btoa()` が呼ばれる。`btoa()` は **Latin-1 範囲 (U+0000〜U+00FF) しか扱えない**ため、Latin-1 範囲外文字 (日本語、中国語、ハングル、絵文字、特殊ダッシュ等) を含むラベルでエラーになる:
+### 非 ASCII ラベル (日本語・CJK) は基本的に問題ない [検証済み 2026-07]
+
+過去のバージョンでは、GitHub 上で mermaid を表示する際に非 ASCII 文字 (日本語・中国語等) を含むラベルで `btoa()` の Latin-1 範囲エラーが発生するという既知の問題が報告されていた:
 
 ```
 Unable to render rich display
 Failed to execute 'btoa' on 'Window': The string to be encoded contains characters outside of the Latin1 range.
 ```
 
-### 対処 (優先順)
+しかし `plugins/mermaid/skills/mermaid-lint/fixtures/github_render_verification.md` を使って github.com 上で実地検証した結果 (2026-07)、**未クォートの CJK テキストは以下のいずれの位置でもエラーなく描画された**:
 
-**1. ノードラベル/エッジラベルをダブルクォートで囲む**
+- flowchart のノードラベル (`[...]` 内)・パイプラベル (`|...|`)・ドット付きリンクラベル (`-. text .->`)
+- flowchart の素のノード ID・subgraph ID
+- stateDiagram の素の状態 ID・遷移ラベル
 
-mermaid 公式 (https://mermaid.js.org/syntax/flowchart.html#unicode-text) も Unicode テキストにはダブルクォート囲みを明示推奨。GitHub renderer も内部で entity 化して扱うため、これだけで通ることが多い:
+このエラーは GitHub 側 (Viewscreen) か mermaid.js 側のどちらかの改善で既に解消されている可能性が高い。ダブルクォートで囲む対処自体は無害だが、**必須ではない**。
 
-```mermaid
-flowchart LR
-    R(["要件定義"]) --> D(["設計"]) --> P(["計画"])
-    A -. "コンテキスト収集" .-> B
-    C -->|"随時"| D
+**将来的にこのエラーを実際に見かけたら**: `github_render_verification.md` の該当セクションを使って再現・切り分けし、このドキュメントを更新すること。バージョンアップで再発する可能性がある挙動なので、一次情報 (mermaid.js の changelog、GitHub のレンダラー更新) を疑ってかかること。
+
+### 絵文字・矢印・数学記号等の Unicode 記号を素の識別子に使うと Lexical error [検証済み 2026-07]
+
+btoa エラーとは別に、実地検証で確認された実在の問題がある。**Unicode の Symbol カテゴリ (絵文字・矢印・数学記号等) の文字をクォートなしで識別子 (ノード ID 等) に使うと、mermaid の lexer がトークン認識に失敗する**。CJK (Letter カテゴリ) では起きない、Symbol カテゴリ特有の問題。
+
+**Broken** (絵文字):
+
+```text
+flowchart TD
+    🎉Party --> End2
 ```
 
-> パイプ形エッジラベル `|...|` も `|"..."|` のように囲める。
+**Broken** (絵文字以外の記号。矢印・数学記号でも同様に失敗する):
 
-**2. それでもエラーが消えないとき (renderer のバージョン差等)**
-
-HTML 数値文字参照に変換すればソースが ASCII-only になり、btoa は確実に通る:
-
-```mermaid
-flowchart LR
-    R(["&#35201;&#20214;&#23450;&#32681;"]) --> D(["&#35373;&#35336;"])
+```text
+flowchart TD
+    A→B --> C
+    f∘g --> C
 ```
 
-可読性が著しく落ちるので、**まず 1 を試し、解消しないときだけ 2 を採用**する。
+エラー例:
 
-### 影響範囲
+```
+Unable to render rich display
+Lexical error on line 2. Unrecognized text.
+flowchart TD 🎉Party --> End2
+```
 
-- ✅ 影響あり: GitHub README.md / Issue / PR / Discussions (`.md` 表示)
-- ❌ 影響なし: mermaid.live editor / VS Code preview / mkdocs-material 等の他レンダラー (`btoa` を使わないため)
+判別の目安 (Python `unicodedata.category()` で確認可能):
 
-### 検証手順
+| カテゴリ | 例 | 素の識別子で使えるか |
+| ---- | ---- | ---- |
+| Letter (`Lo`/`Lm`/`Lu`/`Ll`/`Lt`) | CJK 統合漢字・ひらがな・カタカナ | ✅ 使える |
+| Symbol (`Sm`/`So`/`Sc`/`Sk`) | 絵文字・矢印 (`→`)・数学記号 (`∘`) | ❌ lexical error |
 
-1. 変更前の図を https://mermaid.live/ に貼って構文が valid か確認
-2. GitHub PR のプレビューで rich display エラーが出ないか確認
-3. エラーが出たら、ASCII 外文字を含むラベル/エッジラベルにダブルクォート (or HTML entity) を適用
+ノードラベルとして (`["🎉Party"]` のようにクォートして) 使う分には Symbol カテゴリでも問題ない。stateDiagram の遷移ラベル (コロン後のテキスト) も同様にクォート不要で問題ない (ラベル位置であり識別子ではないため)。素の識別子として使いたい場合は避けるか、ASCII の ID にしてラベル側に記号を置くこと。
 
 ---
 
@@ -339,7 +350,7 @@ mermaid 図を確定する前にチェック:
 - [ ] `Note` keyword を flowchart / classDiagram で使っていないか (sequenceDiagram / stateDiagram-v2 のみ)
 - [ ] classDiagram で関係を書く前に両端の class を宣言したか
 - [ ] `%%` コメントを行末ではなく専用行に書いたか (Rule 8)
-- [ ] **(GitHub に貼る場合)** 非 ASCII 文字を含むラベル/エッジラベルをダブルクォートで囲んだか
+- [ ] 絵文字・矢印・数学記号等の Unicode 記号を識別子 (ノード ID 等) に素のまま使っていないか (ラベルとしてクォートするか ASCII ID にする)
 - [ ] anti-pattern (Broken) 例は `` ```mermaid `` ではなく `` ```text `` ブロックに入れたか (自分自身が壊れないように)
 - [ ] mermaid.live editor で render を確認したか
 
@@ -356,7 +367,7 @@ mermaid 図を確定する前にチェック:
 | `Subgraph X not found`                 | subgraph ID 参照ミス              | Rule 4: edge で参照する subgraph には ID を付ける  |
 | `Syntax error in graph`                | 予約語 `end` を node ID に使った  | Rule 2: `End` 等に rename                          |
 | Unexpected circle/cross arrow          | edge 開始の `o`/`x`               | Rule 3: スペースを挟む                             |
-| `Failed to execute 'btoa' on 'Window'` | GitHub renderer + 非 ASCII ラベル | GitHub Caveats: ダブルクォート or HTML entity      |
+| `Lexical error ... Unrecognized text`  | 絵文字・記号等を素の識別子に使用  | GitHub Caveats: ラベルとしてクォートするか ASCII ID にする |
 | `Note is not defined`                  | flowchart で Note keyword 使用    | Rule 5: 通常ノードで代用 or sequenceDiagram に変更 |
 
 ---

@@ -18,16 +18,42 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **repo 名**: `mermaid-plugin`
 - **marketplace.name**: `mermaid-plugin` (repo 名と同じ)
 - **plugin.name**: `mermaid` (marketplace.json の `plugins[0].name` と一致)
-- **skill ディレクトリ名**: `mermaid-diagram` (SKILL.md frontmatter の `name` と一致)
-- **install 後の slash command**: `/mermaid:mermaid-diagram`
+- **skill ディレクトリ名**: `mermaid-diagram` / `mermaid-lint` (各 SKILL.md frontmatter の `name` と一致)
+- **install 後の slash command**: `/mermaid:mermaid-diagram` / `/mermaid:mermaid-lint`
 
 いずれかを変えるときは連動する全箇所を同時に更新すること。
+
+## 2 つの skill の責務分担
+
+- **`mermaid-diagram`**: ルールの知識ベース。根拠と公式 docs へのリンクを持つ
+- **`mermaid-lint`**: 静的検査。ルールの説明は持たず、判定だけを行う
+
+**ルールを両方に書かない。** `mermaid-lint` にルールの解説を足したくなったら、
+`mermaid-diagram` 側に書いて lint からは参照に留める。二重管理すると片方が陳腐化する。
+
+逆に、lint が仕様上正しい書き方を落とすなら、それは誤検出として lint 側を直す。
+実例: 行末 `%%` コメントは flowchart では parse error だが、state diagram の公式仕様は
+文末コメントを許している。`mermaid-diagram` の Rule 8 は「種別問わず専用行が安全」と
+助言しているが、`mermaid-lint` は flowchart でのみ NG にしている。
+
+## 同梱スクリプトのパス参照
+
+`${CLAUDE_SKILL_DIR}` を使う。plugin skill では skill 自身のサブディレクトリ (plugin root ではない) に
+解決され、**SKILL.md 本文と `allowed-tools` の Bash ルールの両方**で置換される。
+同じ文字列を両方に書けば許可プロンプトなしで実行できる (Claude Code v2.1.129 以降)。
+
+`${CLAUDE_PLUGIN_ROOT}` は skill 本文では展開されるが、`allowed-tools` での置換は公式に明記がない。
+同梱スクリプトを呼ぶ用途では `${CLAUDE_SKILL_DIR}` を使うこと。
+なお `CLAUDE_PLUGIN_DIR` という変数は存在しない。
+
+スクリプトは `chmod +x` して shebang を付ける。依存は標準ライブラリのみに保つ
+(利用者の環境に何が入っているか制御できないため)。
 
 ## SKILL.md を編集する際の注意
 
 `plugins/mermaid/skills/mermaid-diagram/SKILL.md` 自身が mermaid 図の正しい書き方を扱うので、自己言及の罠がある:
 
-- SKILL.md 内で mermaid サンプルを書くなら、SKILL.md 自身が説いているルール（ダブルクォート escape、`btoa` 対策、`%%` 専用行など）を守る
+- SKILL.md 内で mermaid サンプルを書くなら、SKILL.md 自身が説いているルール（ダブルクォート escape、絵文字・矢印・数学記号等を素の識別子に使わない、`%%` 専用行など）を守る
 - **Broken 例は ` ```mermaid ` ではなく ` ```text ` ブロックに入れる**。GitHub renderer で本文書自体が parse error になるのを防ぐ
 - 例の改訂時は GitHub レンダラーでの表示も確認する (README は GitHub で表示されるため特に)
 
