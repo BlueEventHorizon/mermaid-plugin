@@ -14,9 +14,9 @@
     WARN  意図次第で正しい場合がある。終了コード 0
 
 日本語・CJK ラベル/識別子の未クォートは検査しない。fixtures/github_render_verification.md
-での実地検証 (2026-07) の結果、GitHub 上で問題が再現しなかったため。絵文字・矢印・数学記号等
-の Unicode 記号を素の識別子に使った場合は lexical error になることを同じ検証で確認済みで、
-そちらは検査する。
+での実地検証 (2026-07) の結果、GitHub 上で問題が再現しなかったため。flowchart では絵文字・
+矢印・数学記号等の Unicode 記号を素の識別子に使うと lexical error になるため検査する。
+stateDiagram-v2 は同じ文字を状態 ID に使用できるため検査しない。
 """
 
 from __future__ import annotations
@@ -48,8 +48,6 @@ OX_EDGE_RE = re.compile(r"-{2,3}[ox][A-Za-z_]")
 
 # flowchart / classDiagram では Note キーワードが使えない。
 NOTE_RE = re.compile(r"^\s*[Nn]ote\s+(right|left|over)\b")
-
-STATE_DECL_RE = re.compile(r'^\s*state\s+"')
 
 
 @dataclass
@@ -150,32 +148,6 @@ def lint_flowchart(block: str, offset: int, findings: list[Finding]) -> None:
             )
 
 
-def lint_state_diagram(block: str, offset: int, findings: list[Finding]) -> None:
-    """stateDiagram-v2 の検査。
-
-    公式は state diagram のコメントを「専用行でも文末でもよい」としているため、
-    flowchart と違い行末 `%%` は咎めない。
-    """
-    for index, line in enumerate(block.split("\n")):
-        lineno = offset + index
-        stripped = line.strip()
-        if not stripped or stripped.startswith("%%") or STATE_DECL_RE.match(line):
-            continue
-
-        # state diagram は行末コメントを公式が許すため、咎めずに落とすだけにする。
-        line = line.split("%%")[0]
-        if has_unsafe_bare_char(strip_labels(line.split(":")[0])):
-            findings.append(
-                Finding(
-                    "NG",
-                    "lexical",
-                    lineno,
-                    "絵文字・記号等を素の状態 ID に使うと lexical error になる。"
-                    f'`state "名前" as S1` で宣言する: {clip(line)}',
-                )
-            )
-
-
 def lint_class_diagram(block: str, offset: int, findings: list[Finding]) -> None:
     for index, line in enumerate(block.split("\n")):
         if NOTE_RE.match(line):
@@ -193,8 +165,6 @@ def lint_block(block: str, offset: int, findings: list[Finding]) -> None:
     kind = diagram_kind(block)
     if kind in FLOWCHART_KINDS:
         lint_flowchart(block, offset, findings)
-    elif kind.startswith("stateDiagram"):
-        lint_state_diagram(block, offset, findings)
     elif kind == "classDiagram":
         lint_class_diagram(block, offset, findings)
 

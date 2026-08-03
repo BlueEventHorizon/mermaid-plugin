@@ -1,6 +1,6 @@
 # mermaid-plugin
 
-Mermaid 図を書くときに AI が見落としがちな**暗黙ルール**と**主要 renderer 固有の制約**（絵文字・矢印・数学記号等を素の識別子に使った際の lexical error 等）を最小セットでまとめた Skill を、**Claude Code Plugin marketplace** と **OpenAI Codex CLI Skill** の両規格で配布する単独リポジトリ。
+Mermaid 図を書くときに AI が見落としがちな**暗黙ルール**と**主要 renderer 固有の制約**（絵文字・矢印・数学記号等を flowchart の素の ID に使った際の lexical error 等）を最小セットでまとめた Skill を、**Claude Code Plugin marketplace** と **OpenAI Codex CLI Skill** の両規格で配布する単独リポジトリ。
 
 Skill は 2 つある。
 
@@ -20,7 +20,7 @@ Skill は 2 つある。
 - ✅ `Note` / `note` が使える diagram 種別の整理
 - ✅ classDiagram の前方参照・method 戻り値構文
 - ✅ `%%` コメントは専用行のみ (行末コメントは parse error)
-- ✅ 絵文字・矢印・数学記号等（Unicode Symbol カテゴリ）を素の識別子に使うと lexical error になる問題の回避
+- ✅ 絵文字・矢印・数学記号等（Unicode Symbol カテゴリ）を flowchart の素の ID に使うと lexical error になる問題の回避
 
 詳細は [`plugins/mermaid/skills/mermaid-diagram/SKILL.md`](plugins/mermaid/skills/mermaid-diagram/SKILL.md) と実例ベースのトラブルシュート集 [`common-errors.md`](plugins/mermaid/skills/mermaid-diagram/common-errors.md) を参照。
 
@@ -95,9 +95,11 @@ mermaid-plugin/                                  # repo = marketplace
 │       │   │   └── common-errors.md
 │       │   └── mermaid-lint/
 │       │       ├── SKILL.md
-│       │       └── scripts/
-│       │           ├── lint_mermaid.py          # 標準ライブラリのみ
-│       │           └── fixture.md               # 検出テスト用（保守用）
+│       │       ├── scripts/
+│       │       │   └── lint_mermaid.py          # 標準ライブラリのみ
+│       │       └── fixtures/
+│       │           ├── fixture.md               # 検出テスト用（保守用）
+│       │           └── github_render_verification.md
 │       └── .agents/
 │           └── skills/
 │               ├── mermaid-diagram → ../../skills/mermaid-diagram   # Codex 互換 symlink
@@ -139,8 +141,9 @@ claude plugin validate ./plugins/mermaid --strict
 readlink plugins/mermaid/.agents/skills/mermaid-diagram
 # 期待: ../../skills/mermaid-diagram
 
-# lint の検出テスト（NG 6 件 / WARN 2 件、終了コード 1 になること）
-cd plugins/mermaid/skills/mermaid-lint/scripts && ./lint_mermaid.py fixture.md
+# lint の検出テスト（NG 6 件 / WARN 1 件、終了コード 1 になること）
+plugins/mermaid/skills/mermaid-lint/scripts/lint_mermaid.py \
+  plugins/mermaid/skills/mermaid-lint/fixtures/fixture.md
 
 # lint の誤検出テスト（NG 0 件になること）
 plugins/mermaid/skills/mermaid-lint/scripts/lint_mermaid.py \

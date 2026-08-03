@@ -1,7 +1,7 @@
 ---
 name: mermaid-diagram
 description: |
-  Helps avoid common errors when authoring mermaid diagrams (flowchart, sequenceDiagram, classDiagram, stateDiagram-v2, erDiagram, gantt, mindmap). Covers mermaid v10+ syntax pitfalls (reserved word `end`, circle/cross edge misparse, Note keyword scope, comment placement) AND a known lexer limitation with Unicode Symbol-category characters (emoji, arrows, math symbols) in bare identifiers. Use when creating or editing mermaid diagrams in documentation, README, or design files. Always cross-check official docs at mermaid.js.org for authoritative syntax.
+  Helps avoid common errors when authoring mermaid diagrams (flowchart, sequenceDiagram, classDiagram, stateDiagram-v2, erDiagram, gantt, mindmap). Covers mermaid v10+ syntax pitfalls (reserved word `end`, circle/cross edge misparse, Note keyword scope, comment placement) AND a known flowchart lexer limitation with Unicode Symbol-category characters (emoji, arrows, math symbols) in bare identifiers. Use when creating or editing mermaid diagrams in documentation, README, or design files. Always cross-check official docs at mermaid.js.org for authoritative syntax.
 allowed-tools: Write, Edit, Read, WebFetch
 ---
 
@@ -301,9 +301,12 @@ Failed to execute 'btoa' on 'Window': The string to be encoded contains characte
 
 **将来的にこのエラーを実際に見かけたら**: `github_render_verification.md` の該当セクションを使って再現・切り分けし、このドキュメントを更新すること。バージョンアップで再発する可能性がある挙動なので、一次情報 (mermaid.js の changelog、GitHub のレンダラー更新) を疑ってかかること。
 
-### 絵文字・矢印・数学記号等の Unicode 記号を素の識別子に使うと Lexical error [検証済み 2026-07]
+### flowchart の素の識別子に Unicode 記号を使うと Lexical error [検証済み 2026-08]
 
-btoa エラーとは別に、実地検証で確認された実在の問題がある。**Unicode の Symbol カテゴリ (絵文字・矢印・数学記号等) の文字をクォートなしで識別子 (ノード ID 等) に使うと、mermaid の lexer がトークン認識に失敗する**。CJK (Letter カテゴリ) では起きない、Symbol カテゴリ特有の問題。
+btoa エラーとは別に、flowchart には実地検証で確認された制約がある。**Unicode の Symbol
+カテゴリ (絵文字・矢印・数学記号等) の文字をクォートなしで node / subgraph ID に使うと、
+flowchart の lexer がトークン認識に失敗する**。CJK (Letter カテゴリ) では起きない、
+Symbol カテゴリ特有の問題。
 
 **Broken** (絵文字):
 
@@ -330,12 +333,18 @@ flowchart TD 🎉Party --> End2
 
 判別の目安 (Python `unicodedata.category()` で確認可能):
 
-| カテゴリ | 例 | 素の識別子で使えるか |
+| カテゴリ | 例 | flowchart の素の ID |
 | ---- | ---- | ---- |
 | Letter (`Lo`/`Lm`/`Lu`/`Ll`/`Lt`) | CJK 統合漢字・ひらがな・カタカナ | ✅ 使える |
 | Symbol (`Sm`/`So`/`Sc`/`Sk`) | 絵文字・矢印 (`→`)・数学記号 (`∘`) | ❌ lexical error |
 
-ノードラベルとして (`["🎉Party"]` のようにクォートして) 使う分には Symbol カテゴリでも問題ない。stateDiagram の遷移ラベル (コロン後のテキスト) も同様にクォート不要で問題ない (ラベル位置であり識別子ではないため)。素の識別子として使いたい場合は避けるか、ASCII の ID にしてラベル側に記号を置くこと。
+flowchart のノードラベルとして (`["🎉Party"]` のようにクォートして) 使う分には Symbol
+カテゴリでも問題ない。素の flowchart ID として使いたい場合は避けるか、ASCII の ID にして
+ラベル側に記号を置くこと。
+
+**stateDiagram-v2 へこの制約を一般化してはいけない。** Mermaid 11.16.0 と GitHub 上の
+実地検証では、Symbol・句読点・数字・全角空白を含む素の状態 ID も描画できた。遷移ラベルだけでなく
+状態 ID 自体も使用可能であり、flowchart と lexer の許容範囲が異なる。
 
 ---
 
