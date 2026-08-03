@@ -32,26 +32,26 @@ mermaid 11.16.0 と jsdom を使い、DOM と `getBBox()` 等を用意したう�
 
 **確認済み（ラウンド2、2026-08、mermaid 11.16.0 `render()`）**:
 
-| ケース | 内容 | 結果 |
-| --- | --- | --- |
-| 1 | flowchart: 絵文字を含む素の subgraph ID | `Lexical error` |
-| 2 | stateDiagram-v2: 絵文字を含む遷移ラベル | OK |
-| 3 | flowchart: 素の ID の矢印記号 `→` | `Lexical error` |
-| 4 | flowchart: 素の ID の数学記号 `∘` | `Lexical error` |
-| 4b | flowchart: 素の ID の句読点 `・` (Po) | `Lexical error` |
-| 4c | flowchart: 素の ID の全角数字 `０` (Nd) | `Lexical error` |
-| 5 | flowchart: クォートした絵文字 subgraph タイトル | OK |
-| 6 | stateDiagram-v2: 記号等を含む素の状態 ID | OK |
+| ケース | 内容                                            | 結果            |
+| ------ | ----------------------------------------------- | --------------- |
+| 1      | flowchart: 絵文字を含む素の subgraph ID         | `Lexical error` |
+| 2      | stateDiagram-v2: 絵文字を含む遷移ラベル         | OK              |
+| 3      | flowchart: 素の ID の矢印記号 `→`               | `Lexical error` |
+| 4      | flowchart: 素の ID の数学記号 `∘`               | `Lexical error` |
+| 4b     | flowchart: 素の ID の句読点 `・` (Po)           | `Lexical error` |
+| 4c     | flowchart: 素の ID の全角数字 `０` (Nd)         | `Lexical error` |
+| 5      | flowchart: クォートした絵文字 subgraph タイトル | OK              |
+| 6      | stateDiagram-v2: 記号等を含む素の状態 ID        | OK              |
 
 追加の位置別検証:
 
-| ケース | 結果 |
-| --- | --- |
-| flowchart: 素の subgraph ID に CJK (`subgraph App層`) | OK |
+| ケース                                                 | 結果            |
+| ------------------------------------------------------ | --------------- |
+| flowchart: 素の subgraph ID に CJK (`subgraph App層`)  | OK              |
 | flowchart: 素の subgraph ID に Po (`subgraph App・層`) | `Lexical error` |
-| flowchart: 未クォートノードラベル `[未読・既読]` | OK |
-| flowchart: 未クォートパイプラベル `|実装・検証|` | OK |
-| flowchart: 未クォートノードラベル `[未読(初期)]` | `Parse error` |
+| flowchart: 未クォートノードラベル `[未読・既読]`       | OK              |
+| flowchart: 未クォートパイプラベル `                    | 実装・検証      |
+| flowchart: 未クォートノードラベル `[未読(初期)]`       | `Parse error`   |
 
 素の node / subgraph ID は Letter 以外の非 ASCII 文字がエラーになる一方、ラベル位置では
 Po も使用できる。ラベルを壊す ASCII の構文文字とは別問題である。また stateDiagram-v2 は
