@@ -1,7 +1,7 @@
 # lint_mermaid.py 検出テスト用フィクスチャ
 
 保守用。各検査が実際に発火することを確認する。
-期待値は **NG 7 件 / WARN 1 件**、終了コード 1。
+期待値は **NG 6 件 / WARN 1 件**、終了コード 1。
 
 ```bash
 ../scripts/lint_mermaid.py fixture.md
@@ -58,11 +58,14 @@ flowchart TD
     🎉Party --> End2
 ```
 
-## 7. stateDiagram: 絵文字を含む素の状態 ID（NG lexical を期待）
+## 7. stateDiagram: 記号等を含む素の状態 ID（何も出ない。Issue #1 の誤検出回帰確認）
 
 ```mermaid
 stateDiagram-v2
     🎉Party --> End2
+    A→B --> f∘g
+    未読・既読 --> 状態０
+    全角　空白 --> End3
 ```
 
 ## 7b. flowchart: 矢印記号を含む素のノード ID（NG lexical を期待。絵文字以外の Symbol カテゴリ文字も対象）

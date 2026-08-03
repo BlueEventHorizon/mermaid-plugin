@@ -16,7 +16,15 @@
 
 **確認済み・唯一の実在問題（ラウンド1、2026-07）**: 絵文字（サロゲートペア文字）を素のノード ID に使うと `Lexical error` になる（`btoa` エラーではない）。`lint_mermaid.py` の `lexical` チェックはこれに対応する。
 
-**今回検証する項目（ラウンド2）**: ラウンド1で未検証だった、絵文字関連の他パターンと、CJK/絵文字以外の Unicode 記号を検証する。
+**確認済み（ラウンド2、2026-08）**:
+
+- flowchart の素の subgraph / node ID に絵文字・矢印・数学記号を使うと `Lexical error`
+- stateDiagram-v2 の遷移ラベルと素の状態 ID では同じ文字を使用可能
+- クォート済みの flowchart subgraph タイトルでは使用可能
+
+stateDiagram-v2 の状態 ID は Mermaid 11.16.0 の `mermaid.render()` でも、GitHub 上の
+[Issue #1](https://github.com/BlueEventHorizon/mermaid-plugin/issues/1) でも描画を確認した。
+flowchart と stateDiagram-v2 は同じ lexical 制約を持たない。
 
 ## 1. flowchart: 絵文字を含む素の subgraph ID
 
@@ -57,4 +65,14 @@ flowchart TD
     subgraph SG["🎉Party"]
         Foo --> Bar
     end
+```
+
+## 6. stateDiagram-v2: 記号等を含む素の状態 ID
+
+```mermaid
+stateDiagram-v2
+    🎉Party --> A→B
+    A→B --> f∘g
+    f∘g --> 未読・既読
+    未読・既読 --> 全角　空白
 ```
