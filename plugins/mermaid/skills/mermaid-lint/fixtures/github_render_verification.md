@@ -1,6 +1,8 @@
 # Mermaid レンダリング実地検証用フィクスチャ
 
 `mermaid-lint` の文字カテゴリ関連ルールを、実パーサと GitHub レンダラーで切り分けるための資料。
+検証の手順そのものは `../docs/verification-methodology.md` を参照。本ファイルはその手順を
+適用した結果の記録。
 
 ## 検証方法
 

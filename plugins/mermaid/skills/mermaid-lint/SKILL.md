@@ -90,3 +90,5 @@ PR プレビューでも rich display エラーが出ないか確認する。
 - `fixtures/fixture.md` — 各検査が発火することを確認するためのフィクスチャ。保守用
 - `fixtures/github_render_verification.md` — Mermaid 実パーサと GitHub 上でのレンダリング検証記録。
   一般的な構文は実パーサ、btoa 等の GitHub 固有挙動は github.com 上で再現・切り分ける
+- `docs/verification-methodology.md` — 上記検証の手順そのもの。ルールを追加・削除する前に
+  想像ではなく実地検証で根拠を作る方法（実パーサのセットアップ、claude-in-chrome での GitHub 確認）

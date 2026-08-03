@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# plugin-installer-template-version: 2
+# plugin-installer-template-version: 3
 # plugin-installer-creator により生成 — 再生成: このプラグインプロジェクトで /meta:plugin-installer-creator を実行
 #
 # renewal copy mode (DES-007 / FNC-009): プラグインルート配下を以下の規則で
@@ -40,10 +40,7 @@ _cleanup_swap() {
 trap _cleanup_swap EXIT INT TERM
 
 # === parse_args =====================================================
-# --copy フラグは持たない (本スクリプト自体が copy mode 専用)。
-# --codex / --codex-user は renewal §1.7 の通り即時エラー (sample-out-of-scope)。
-CODEX=0
-CODEX_USER=0
+# 本スクリプト自体が Claude project copy 専用。
 YES=0
 FORCE=0
 ARGS=()
@@ -51,22 +48,17 @@ ARGS=()
 parse_args() {
 	for arg in "$@"; do
 		case "$arg" in
-		--codex) CODEX=1 ;;
-		--codex-user) CODEX_USER=1 ;;
 		--yes) YES=1 ;;
 		--force) FORCE=1 ;;
+		--*)
+			echo "Error: unknown option: $arg" >&2
+			exit 1
+			;;
 		*) ARGS+=("$arg") ;;
 		esac
 	done
 }
 parse_args "$@"
-
-# § 5.7 サポート外モード呼び出し
-if [ "$CODEX" -eq 1 ] || [ "$CODEX_USER" -eq 1 ]; then
-	echo "Error: install_copy.sh supports only type A (Claude Code project) in renewal scope." >&2
-	echo "  Codex (--codex / --codex-user) is out of scope (separate feature)." >&2
-	exit 1
-fi
 
 if [ "${#ARGS[@]}" -lt 1 ]; then
 	echo "Usage: $0 [--yes] [--force] <plugin_name> [target_dir]" >&2
@@ -338,8 +330,15 @@ copy_leaf() {
 }
 
 # === expand_placeholders ============================================
-# DES-007 §5.3 (Issue #9 S2/S3/S4): 配置先のファイルツリーに対し ${CLAUDE_PLUGIN_ROOT} 参照 /
-# ${CLAUDE_SKILL_DIR} 参照 を project-relative パスに静的置換する。
+# DES-007 §5.3 (Issue #9 S2/S3/S4): 配置先のファイルツリーに対し ${CLAUDE_PLUGIN_ROOT} 参照を
+# project-relative パスに静的置換する。
+#
+# 注: ${CLAUDE_SKILL_DIR} はここでは置換しない。Claude Code ランタイムが SKILL.md 本文中の
+# ${CLAUDE_SKILL_DIR} を実行時に自動展開する (v2.1.129+、公式 skills doc)。plugin.json の
+# 有無に関係なく SKILL.md が置かれたディレクトリだけで決まるスキルレベルの変数であり、
+# install_copy.sh は種別 A (Claude Code プロジェクト) 専用のため、常にランタイム解決の
+# 対象になる。静的置換すると project-relative パス (.claude/skills/<skill>) になり、
+# ランタイムの絶対パス解決より cwd 依存で脆弱になるため、あえて置換しない。
 #
 # S2: ${CLAUDE_PLUGIN_ROOT} の直後のセグメントは配置ロジックと同じ分類 (OFFICIAL_TOPLEVEL か、
 #     実際に配置した catch-all top-level 名か) で第一階層ごとにケース分けする。単一値
@@ -354,7 +353,6 @@ expand_placeholders() {
 
 	local -a scan_dests=()
 	local -a catchall_tops=()
-	local -a skill_dests=()
 	local i n
 	n="${#PLAN_SRCS[@]}"
 	for ((i = 0; i < n; i++)); do
@@ -365,9 +363,6 @@ expand_placeholders() {
 		fi
 		if [ "$action" = "install" ] || [ "$action" = "reinstall" ]; then
 			scan_dests+=("${PLAN_DESTS[$i]}")
-			if [ "$cat" = "skill" ]; then
-				skill_dests+=("${PLAN_DESTS[$i]}")
-			fi
 		fi
 	done
 
@@ -387,8 +382,6 @@ expand_placeholders() {
 		[ "${#scan_dests[@]}" -gt 0 ] && printf '%s\n' "${scan_dests[@]}"
 		printf '%s\n' "${#catchall_tops[@]}"
 		[ "${#catchall_tops[@]}" -gt 0 ] && printf '%s\n' "${catchall_tops[@]}"
-		printf '%s\n' "${#skill_dests[@]}"
-		[ "${#skill_dests[@]}" -gt 0 ] && printf '%s\n' "${skill_dests[@]}"
 	} >"$data_file"
 
 	local py_exit=0
@@ -405,13 +398,6 @@ scan_dests = lines[idx:idx + n_dest]; idx += n_dest
 n_cat = int(lines[idx]); idx += 1
 catchall_tops = set(lines[idx:idx + n_cat]) if n_cat > 0 else set()
 idx += n_cat
-n_skill = int(lines[idx]); idx += 1
-skill_dest_paths = lines[idx:idx + n_skill] if n_skill > 0 else []
-# ${CLAUDE_SKILL_DIR} 解決の対象は「実際に配置した skill leaf の SKILL.md」のみに厳密一致させる
-# (fpath.parent が skill leaf の dest 絶対パスと一致する場合のみ)。ディレクトリ名だけを見る判定
-# (parent.parent.name == 'skills') では、catch-all 配下に偶然できた同名構造
-# (例: docs/skills/<name>/SKILL.md) まで誤って skill と誤認してしまう (実測で確認済み)。
-skill_dest_set = {pathlib.Path(p).resolve() for p in skill_dest_paths}
 
 OFFICIAL_TOPLEVEL = {'skills', 'agents', 'commands'}
 target_suffixes = {'.md', '.yaml', '.sh', '.toml'}
@@ -426,8 +412,6 @@ target_suffixes = {'.md', '.yaml', '.sh', '.toml'}
 _D = chr(36)  # '$'
 ROOT_BRACE_RE  = re.compile(re.escape(_D + '{CLAUDE_PLUGIN_ROOT}') + r'(?=/)')
 ROOT_BARE_RE   = re.compile(re.escape(_D + 'CLAUDE_PLUGIN_ROOT') + r'(?=/)')
-SKILL_BRACE_RE = re.compile(re.escape(_D + '{CLAUDE_SKILL_DIR}') + r'(?=/)')
-SKILL_BARE_RE  = re.compile(re.escape(_D + 'CLAUDE_SKILL_DIR') + r'(?=/)')
 SEG_RE = re.compile(r'/([^/]+)')
 
 errors = []  # (kind, file, detail)
@@ -466,10 +450,6 @@ changed = 0
 for fpath in files_to_process:
     if fpath.suffix not in target_suffixes:
         continue
-    # SKILL.md の skill_name 解決: 実際に配置した skill leaf の dest 直下の SKILL.md のみ
-    # ${CLAUDE_SKILL_DIR} を解決する (FNC-009 §3.7.1: skills/<skill>/SKILL.md のみが対象)
-    is_skill_md = fpath.name == 'SKILL.md' and fpath.parent.resolve() in skill_dest_set
-    skill_name = fpath.parent.name if is_skill_md else None
 
     text = fpath.read_text(encoding='utf-8', errors='surrogateescape')
     t = text
@@ -477,10 +457,6 @@ for fpath in files_to_process:
     root_sub = make_root_sub(fpath)
     t = ROOT_BRACE_RE.sub(root_sub, t)
     t = ROOT_BARE_RE.sub(root_sub, t)
-    if is_skill_md and skill_name:
-        skill_rel = f'.claude/skills/{skill_name}'
-        t = SKILL_BRACE_RE.sub(skill_rel, t)
-        t = SKILL_BARE_RE.sub(skill_rel, t)
 
     if t != text:
         fpath.write_text(t, encoding='utf-8', errors='surrogateescape')
