@@ -25,7 +25,9 @@ mermaid 図を書くとき、AI が見落としがちな暗黙ルールと、主
 | gantt                      | https://mermaid.js.org/syntax/gantt.html                                                                    |
 | mindmap                    | https://mermaid.js.org/syntax/mindmap.html                                                                  |
 | GitHub の mermaid サポート | https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-diagrams |
-| Live editor (要検証時)     | https://mermaid.live/                                                                                       |
+
+要検証時は `mermaid.live` 等の外部サイトに図を貼らない（情報漏洩リスク）。
+`mermaid-lint/docs/verification-methodology.md` のローカル実パーサ / GitHub 上の確認手順を使う。
 
 ### 想定バージョン
 
@@ -368,7 +370,7 @@ mermaid 図を確定する前にチェック:
 - [ ] `%%` コメントを行末ではなく専用行に書いたか (Rule 8)
 - [ ] flowchart の素の ID に Letter 以外の非 ASCII 文字（記号・句読点・全角数字・全角括弧等）を使っていないか (ラベルとしてクォートするか ASCII ID にする)
 - [ ] anti-pattern (Broken) 例は `` ```mermaid `` ではなく `` ```text `` ブロックに入れたか (自分自身が壊れないように)
-- [ ] mermaid.live editor で render を確認したか
+- [ ] `mermaid-lint/docs/verification-methodology.md` の手順（ローカル実パーサ / GitHub 上）で render を確認したか
 
 ---
 
@@ -394,4 +396,4 @@ mermaid 図を確定する前にチェック:
 
 - **公式 docs の代替ではない**: 公式の `mermaid.js.org` を最優先で読むこと
 - **網羅的なリファレンスではない**: 暗黙ルールと renderer 固有制約に絞っている
-- **特定 mermaid バージョンに固定されていない**: GitHub の renderer バージョン更新で挙動が変わる可能性がある。違和感があれば mermaid.live で同じ図を render して renderer 差を切り分けること
+- **特定 mermaid バージョンに固定されていない**: GitHub の renderer バージョン更新で挙動が変わる可能性がある。違和感があれば `mermaid-lint/docs/verification-methodology.md` の実パーサで同じ図を render して renderer 差を切り分けること（mermaid.live 等の外部サイトは使わない）

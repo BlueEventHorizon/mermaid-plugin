@@ -3,7 +3,8 @@
 
 `mermaid-diagram` Skill が説くルールのうち、機械判定できるものだけを検査する。
 標準ライブラリのみで動く。mermaid パーサーは使わないため、構文エラーを網羅はしない。
-描画の最終確認は https://mermaid.live/ で行うこと。
+描画の最終確認は docs/verification-methodology.md の手順（ローカル実パーサ / GitHub 上）で行うこと。
+mermaid.live 等、GitHub 以外の外部サイトに図を貼らない（情報漏洩リスクがあるため禁止）。
 
 使い方:
     lint_mermaid.py <FILE>...        Markdown なら ```mermaid ブロックを抽出して検査
@@ -239,7 +240,9 @@ def main() -> int:
 
     print(f"OK  mermaid ブロック {blocks} 個に NG はありません。")
     print(
-        "静的検査はパーサーの代わりにはなりません。https://mermaid.live/ で描画も確認してください。"
+        "静的検査はパーサーの代わりにはなりません。docs/verification-methodology.md の手順"
+        "（ローカル実パーサ / GitHub 上）で描画も確認してください。"
+        "mermaid.live 等の外部サイトに図を貼らないこと。"
     )
     return 0
 

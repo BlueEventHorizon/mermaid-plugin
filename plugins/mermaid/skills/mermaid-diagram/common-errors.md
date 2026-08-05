@@ -382,7 +382,7 @@ flowchart TD
 
 1. **コメントアウトで二分探索**: 怪しいノード/エッジを `%%` でコメント化し、再 render
 2. **シンプル化**: 全特殊文字を除き、最小構造で render → 通ったら incrementally に戻す
-3. **mermaid.live で再現**: GitHub renderer の問題か mermaid 仕様の問題かを切り分け
+3. **ローカル実パーサで再現**（`mermaid-lint/docs/verification-methodology.md`、mermaid.live 等の外部サイトは使わない）: GitHub renderer の問題か mermaid 仕様の問題かを切り分け
 4. **公式 docs を読む**: バージョンによる挙動差は公式の changelog で確認
 
 ---
