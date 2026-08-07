@@ -26,7 +26,9 @@ Skill は 2 つある。
 
 上のうち機械判定できるものは [`mermaid-lint`](plugins/mermaid/skills/mermaid-lint/SKILL.md) が検査する。
 標準ライブラリのみの Python スクリプトで、Markdown 内の `` ```mermaid `` ブロックを抽出して検査する。
-mermaid パーサーは使わないため構文エラーを網羅しない。描画の最終確認は <https://mermaid.live/> で行う。
+mermaid パーサーは使わないため構文エラーを網羅しない。描画の最終確認はローカル実パーサ / GitHub 上で行う
+（[`verification-methodology.md`](plugins/mermaid/skills/mermaid-lint/docs/verification-methodology.md)）。
+`mermaid.live` 等、GitHub 以外の外部サイトに図を貼らない（情報漏洩リスクがあるため禁止）。
 
 ## インストール
 
@@ -63,6 +65,25 @@ git clone https://github.com/BlueEventHorizon/mermaid-plugin ~/tools/mermaid-plu
 claude --plugin-dir ~/tools/mermaid-plugin/plugins/mermaid
 ```
 
+### Claude Code (プロジェクトへ直接配置)
+
+marketplace registry を使わず、特定プロジェクトの `.claude/` 配下へ実ファイルとして commit-safe に
+配置したい場合（バージョン固定・オフライン利用向け）:
+
+```bash
+git clone https://github.com/BlueEventHorizon/mermaid-plugin ~/tools/mermaid-plugin
+cd ~/tools/mermaid-plugin
+make install-claude-project-copy DIR=/path/to/your/project
+```
+
+`skills/` は実ファイルとして `.claude/skills/` 配下に配置される。自動 uninstall は
+提供しないため、削除は `git rm -r` で行う（配置後の出力に削除対象パスが表示される）。
+
+> **既知の問題**: catch-all（公式 `skills`/`agents`/`commands` 以外の top-level、
+> このリポジトリでは `.agents/`）は元が symlink の場合そのままコピーされるが、配置先の
+> 階層が変わるため symlink が壊れる（`.claude/.mermaid/.agents/skills/*` が該当）。
+> `mermaid-diagram` / `mermaid-lint` の利用自体には影響しないが、生成元テンプレート側の修正が必要。
+
 ### Codex CLI (OpenAI)
 
 Codex CLI には marketplace 機構がない。`.agents/skills/` を proximity scan する仕様のため、symlink で配置する ([Codex Skills 公式 docs](https://developers.openai.com/codex/skills))。
@@ -95,6 +116,8 @@ mermaid-plugin/                                  # repo = marketplace
 │       │   │   └── common-errors.md
 │       │   └── mermaid-lint/
 │       │       ├── SKILL.md
+│       │       ├── docs/
+│       │       │   └── verification-methodology.md  # ルール改訂前の実地検証手順
 │       │       ├── scripts/
 │       │       │   └── lint_mermaid.py          # 標準ライブラリのみ
 │       │       └── fixtures/
@@ -104,6 +127,10 @@ mermaid-plugin/                                  # repo = marketplace
 │           └── skills/
 │               ├── mermaid-diagram → ../../skills/mermaid-diagram   # Codex 互換 symlink
 │               └── mermaid-lint → ../../skills/mermaid-lint
+├── scripts/
+│   └── plugin-installer/
+│       └── install_copy.sh                      # `make install-claude-project-copy` の実体
+├── Makefile                                      # copy インストーラーの install target
 ├── README.md
 ├── CLAUDE.md
 ├── LICENSE
