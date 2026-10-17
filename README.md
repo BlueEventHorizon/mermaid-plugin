@@ -22,12 +22,12 @@ Skill は 2 つある。
 - ✅ `%%` コメントは専用行のみ (行末コメントは parse error)
 - ✅ Letter 以外の非 ASCII 文字（記号・句読点・全角数字・全角括弧等）を flowchart の素の ID に使うとエラーになる問題の回避
 
-詳細は [`plugins/mermaid/skills/mermaid-diagram/SKILL.md`](plugins/mermaid/skills/mermaid-diagram/SKILL.md) と実例ベースのトラブルシュート集 [`common-errors.md`](plugins/mermaid/skills/mermaid-diagram/common-errors.md) を参照。
+詳細は [`mermaid/skills/mermaid-diagram/SKILL.md`](mermaid/skills/mermaid-diagram/SKILL.md) と実例ベースのトラブルシュート集 [`common-errors.md`](mermaid/skills/mermaid-diagram/common-errors.md) を参照。
 
-上のうち機械判定できるものは [`mermaid-lint`](plugins/mermaid/skills/mermaid-lint/SKILL.md) が検査する。
+上のうち機械判定できるものは [`mermaid-lint`](mermaid/skills/mermaid-lint/SKILL.md) が検査する。
 標準ライブラリのみの Python スクリプトで、Markdown 内の `` ```mermaid `` ブロックを抽出して検査する。
 mermaid パーサーは使わないため構文エラーを網羅しない。描画の最終確認はローカル実パーサ / GitHub 上で行う
-（[`verification-methodology.md`](plugins/mermaid/skills/mermaid-lint/docs/verification-methodology.md)）。
+（[`verification-methodology.md`](mermaid/skills/mermaid-lint/docs/verification-methodology.md)）。
 `mermaid.live` 等、GitHub 以外の外部サイトに図を貼らない（情報漏洩リスクがあるため禁止）。
 
 ## インストール
@@ -62,27 +62,8 @@ mermaid パーサーは使わないため構文エラーを網羅しない。描
 
 ```bash
 git clone https://github.com/BlueEventHorizon/mermaid-plugin ~/tools/mermaid-plugin
-claude --plugin-dir ~/tools/mermaid-plugin/plugins/mermaid
+claude --plugin-dir ~/tools/mermaid-plugin/mermaid
 ```
-
-### Claude Code (プロジェクトへ直接配置)
-
-marketplace registry を使わず、特定プロジェクトの `.claude/` 配下へ実ファイルとして commit-safe に
-配置したい場合（バージョン固定・オフライン利用向け）:
-
-```bash
-git clone https://github.com/BlueEventHorizon/mermaid-plugin ~/tools/mermaid-plugin
-cd ~/tools/mermaid-plugin
-make install-claude-project-copy DIR=/path/to/your/project
-```
-
-`skills/` は実ファイルとして `.claude/skills/` 配下に配置される。自動 uninstall は
-提供しないため、削除は `git rm -r` で行う（配置後の出力に削除対象パスが表示される）。
-
-> **既知の問題**: catch-all（公式 `skills`/`agents`/`commands` 以外の top-level、
-> このリポジトリでは `.agents/`）は元が symlink の場合そのままコピーされるが、配置先の
-> 階層が変わるため symlink が壊れる（`.claude/.mermaid/.agents/skills/*` が該当）。
-> `mermaid-diagram` / `mermaid-lint` の利用自体には影響しないが、生成元テンプレート側の修正が必要。
 
 ### Codex CLI (OpenAI)
 
@@ -94,8 +75,8 @@ git clone https://github.com/BlueEventHorizon/mermaid-plugin ~/tools/mermaid-plu
 
 # 2. プロジェクトの .agents/skills/ から symlink
 mkdir -p .agents/skills
-ln -s ~/tools/mermaid-plugin/plugins/mermaid/skills/mermaid-diagram .agents/skills/mermaid-diagram
-ln -s ~/tools/mermaid-plugin/plugins/mermaid/skills/mermaid-lint .agents/skills/mermaid-lint
+ln -s ~/tools/mermaid-plugin/mermaid/skills/mermaid-diagram .agents/skills/mermaid-diagram
+ln -s ~/tools/mermaid-plugin/mermaid/skills/mermaid-lint .agents/skills/mermaid-lint
 ```
 
 個人全プロジェクト用なら `~/.agents/skills/` 配下に symlink。
@@ -106,31 +87,26 @@ ln -s ~/tools/mermaid-plugin/plugins/mermaid/skills/mermaid-lint .agents/skills/
 mermaid-plugin/                                  # repo = marketplace
 ├── .claude-plugin/
 │   └── marketplace.json                         # marketplace catalog
-├── plugins/
-│   └── mermaid/                                 # 個別 plugin
-│       ├── .claude-plugin/
-│       │   └── plugin.json                      # plugin manifest
-│       ├── skills/
-│       │   ├── mermaid-diagram/                 # canonical skill location
-│       │   │   ├── SKILL.md
-│       │   │   └── common-errors.md
-│       │   └── mermaid-lint/
-│       │       ├── SKILL.md
-│       │       ├── docs/
-│       │       │   └── verification-methodology.md  # ルール改訂前の実地検証手順
-│       │       ├── scripts/
-│       │       │   └── lint_mermaid.py          # 標準ライブラリのみ
-│       │       └── fixtures/
-│       │           ├── fixture.md               # 検出テスト用（保守用）
-│       │           └── github_render_verification.md
-│       └── .agents/
-│           └── skills/
-│               ├── mermaid-diagram → ../../skills/mermaid-diagram   # Codex 互換 symlink
-│               └── mermaid-lint → ../../skills/mermaid-lint
-├── scripts/
-│   └── plugin-installer/
-│       └── install_copy.sh                      # `make install-claude-project-copy` の実体
-├── Makefile                                      # copy インストーラーの install target
+├── mermaid/                                     # 個別 plugin
+│   ├── .claude-plugin/
+│   │   └── plugin.json                          # plugin manifest
+│   ├── skills/
+│   │   ├── mermaid-diagram/                     # canonical skill location
+│   │   │   ├── SKILL.md
+│   │   │   └── common-errors.md
+│   │   └── mermaid-lint/
+│   │       ├── SKILL.md
+│   │       ├── docs/
+│   │       │   └── verification-methodology.md  # ルール改訂前の実地検証手順
+│   │       ├── scripts/
+│   │       │   └── lint_mermaid.py              # 標準ライブラリのみ
+│   │       └── fixtures/
+│   │           ├── fixture.md                   # 検出テスト用（保守用）
+│   │           └── github_render_verification.md
+│   └── .agents/
+│       └── skills/
+│           ├── mermaid-diagram → ../../skills/mermaid-diagram   # Codex 互換 symlink
+│           └── mermaid-lint → ../../skills/mermaid-lint
 ├── README.md
 ├── CLAUDE.md
 ├── LICENSE
@@ -140,9 +116,9 @@ mermaid-plugin/                                  # repo = marketplace
 階層意図:
 
 - **リポジトリルート** = marketplace (catalog として `.claude-plugin/marketplace.json` を持つ)
-- **`plugins/mermaid/`** = 個別の plugin (`.claude-plugin/plugin.json` を持つ)
-- **`plugins/mermaid/skills/<skill>/`** = skill 本体 (実体)
-- **`plugins/mermaid/.agents/skills/<skill>`** = 同一スキルへの Codex 用 symlink
+- **`mermaid/`** = 個別の plugin (`.claude-plugin/plugin.json` を持つ)
+- **`mermaid/skills/<skill>/`** = skill 本体 (実体)
+- **`mermaid/.agents/skills/<skill>`** = 同一スキルへの Codex 用 symlink
 
 skill に同梱したスクリプトは `${CLAUDE_SKILL_DIR}` で参照する。plugin skill では
 skill 自身のサブディレクトリに解決され、SKILL.md 本文と `allowed-tools` の Bash ルールの
@@ -162,20 +138,20 @@ skill 自身のサブディレクトリに解決され、SKILL.md 本文と `all
 claude plugin validate . --strict
 
 # 個別 plugin の検証
-claude plugin validate ./plugins/mermaid --strict
+claude plugin validate ./mermaid --strict
 
 # symlink 解決
-readlink plugins/mermaid/.agents/skills/mermaid-diagram
+readlink mermaid/.agents/skills/mermaid-diagram
 # 期待: ../../skills/mermaid-diagram
 
 # lint の検出テスト（NG 8 件 / WARN 1 件、終了コード 1 になること）
-plugins/mermaid/skills/mermaid-lint/scripts/lint_mermaid.py \
-  plugins/mermaid/skills/mermaid-lint/fixtures/fixture.md
+mermaid/skills/mermaid-lint/scripts/lint_mermaid.py \
+  mermaid/skills/mermaid-lint/fixtures/fixture.md
 
 # lint の誤検出テスト（NG 0 件になること）
-plugins/mermaid/skills/mermaid-lint/scripts/lint_mermaid.py \
-  plugins/mermaid/skills/mermaid-diagram/SKILL.md \
-  plugins/mermaid/skills/mermaid-diagram/common-errors.md
+mermaid/skills/mermaid-lint/scripts/lint_mermaid.py \
+  mermaid/skills/mermaid-diagram/SKILL.md \
+  mermaid/skills/mermaid-diagram/common-errors.md
 ```
 
 ## 出典
