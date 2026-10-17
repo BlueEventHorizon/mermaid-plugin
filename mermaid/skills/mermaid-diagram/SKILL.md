@@ -294,7 +294,7 @@ Unable to render rich display
 Failed to execute 'btoa' on 'Window': The string to be encoded contains characters outside of the Latin1 range.
 ```
 
-しかし `plugins/mermaid/skills/mermaid-lint/fixtures/github_render_verification.md` を使って github.com 上で実地検証した結果 (2026-07)、**未クォートの CJK テキストは以下のいずれの位置でもエラーなく描画された**:
+しかし `mermaid/skills/mermaid-lint/fixtures/github_render_verification.md` を使って github.com 上で実地検証した結果 (2026-07)、**未クォートの CJK テキストは以下のいずれの位置でもエラーなく描画された**:
 
 - flowchart のノードラベル (`[...]` 内)・パイプラベル (`|...|`)・ドット付きリンクラベル (`-. text .->`)
 - flowchart の素のノード ID・subgraph ID

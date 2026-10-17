@@ -2,7 +2,7 @@
 
 targets:
   - name: mermaid
-    version_file: plugins/mermaid/.claude-plugin/plugin.json
+    version_file: mermaid/.claude-plugin/plugin.json
     version_path: version
     sync_files:
       - path: .claude-plugin/marketplace.json

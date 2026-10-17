@@ -16,7 +16,7 @@ SKILL.md の description フィールドと frontmatter を、Claude Code 公式
 ## 引数
 
 - `$ARGUMENTS` が指定された場合 → そのパスまたはプラグイン配下の SKILL.md を対象にする
-- 省略時 → `plugins/` 配下の全 SKILL.md を対象にする
+- 省略時 → `mermaid/skills/` 配下の全 SKILL.md を対象にする
 
 ---
 

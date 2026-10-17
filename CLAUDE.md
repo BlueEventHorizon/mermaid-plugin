@@ -7,9 +7,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 不変条件 (変更時に必ず守る)
 
 1. **`marketplace.json` の `name`/`owner`/`plugins[]` は必須**
-2. **`plugins[].source` は plugin ディレクトリへの相対 path** (例: `./plugins/mermaid`)
+2. **`plugins[].source` は plugin ディレクトリへの相対 path** (例: `./mermaid`)。plugin は repo root 直下のサブディレクトリに置き、`"./"` (repo root 全体がキャッシュへコピーされる) にしない
 3. **`plugin.json` の `name` は plugin namespace** になる (`/mermaid:mermaid-diagram` の前半)
-4. **skill 実体は `plugins/<plugin>/skills/<skill>/` が canonical**。`.agents/skills/<skill>` は **relative symlink** (`../../skills/<skill>`)
+4. **skill 実体は `mermaid/skills/<skill>/` が canonical**。`.agents/skills/<skill>` は **relative symlink** (`../../skills/<skill>`)
 5. **`AGENTS.md` を SKILL.md への symlink にしない** (agents.md 規格は plain markdown 要求、frontmatter と衝突)
 6. **`plugin.json` に `"skills": "./skills/"` のようなデフォルト位置の冗長指定をしない**
 
@@ -51,7 +51,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## SKILL.md を編集する際の注意
 
-`plugins/mermaid/skills/mermaid-diagram/SKILL.md` 自身が mermaid 図の正しい書き方を扱うので、自己言及の罠がある:
+`mermaid/skills/mermaid-diagram/SKILL.md` 自身が mermaid 図の正しい書き方を扱うので、自己言及の罠がある:
 
 - SKILL.md 内で mermaid サンプルを書くなら、SKILL.md 自身が説いているルール（ダブルクォート escape、flowchart の素の ID に Letter 以外の非 ASCII 文字を使わない、`%%` 専用行など）を守る
 - **Broken 例は `` ```mermaid `` ではなく `` ```text `` ブロックに入れる**。GitHub renderer で本文書自体が parse error になるのを防ぐ
@@ -64,7 +64,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `version` を省略すると git commit SHA が版番として使われる
 - バージョンアップはユーザーが明示的に指示した場合のみ行う。SKILL.md の改訂、Issue 対応、
   PR 作成を理由に Agent の判断でバージョンを上げない
-- 現在のバージョンは `plugins/mermaid/.claude-plugin/plugin.json` を正本とし、本ファイルに重複記載しない
+- 現在のバージョンは `mermaid/.claude-plugin/plugin.json` を正本とし、本ファイルに重複記載しない
 
 ## 仕様変更前の再確認
 
@@ -96,7 +96,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 `.claude/` 配下はローカル開発用 (user skills のコピー、settings、temp 等) で `.gitignore` 除外。コミット対象は:
 
 - `.claude-plugin/`
-- `plugins/`
+- `mermaid/`
 - `README.md` / `LICENSE` / `.gitignore` / `CLAUDE.md`
 
 意図せず `.claude/` 配下を `git add` しない。
